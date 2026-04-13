@@ -1,0 +1,30 @@
+# Flutter-related
+**/Flutter/ephemeral/
+**/Pods/
+Podfile.lock
+
+# Xcode-related
+**/dgph
+**/xcuserdata/
+**/DerivedData/
+**/*.xcarchive
+**/*.ipa
+
+# Build artifacts
+**/build/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Cocoapods
+Pods/
+Podfile.lock
+
+# Generated plugin registrant
+GeneratedPluginRegistrant.*

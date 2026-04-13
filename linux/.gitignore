@@ -1,0 +1,25 @@
+flutter/ephemeral/
+
+# Build artifacts
+build/
+.cmake_build_dir/
+CMakeLists.txt.user
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
