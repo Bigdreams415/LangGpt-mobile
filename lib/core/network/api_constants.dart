@@ -1,7 +1,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://localhost:8000'; 
+  static const String baseUrl = 'http://localhost:8000';
   static const String apiPrefix = '/api/v1';
 
   // Auth
@@ -18,6 +18,10 @@ class ApiConstants {
 
   // Home
   static const String homeDashboard = '$apiPrefix/home/dashboard';
+
+  // Lessons
+  static const String lessonsList = '$apiPrefix/lessons/list';
+  static const String lessonDetail = '$apiPrefix/lessons/topic';
 
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);

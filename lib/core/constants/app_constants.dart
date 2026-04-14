@@ -59,6 +59,8 @@ class AppRoutes {
   static const String signupStep3 = '/signup/step-3';
   static const String main = '/main';
   static const String home = '/home';
+  static const String allLessons = '/all-lessons';
+  static const String lessonDetail = '/lesson-detail';
 }
 
 class AppDimensions {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../presentation/providers/home_provider.dart';
 import '../data/models/home_dashboard_model.dart';
@@ -272,7 +273,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const Text("Today's lessons", style: AppTextStyles.headlineMedium),
             TextButton(
               onPressed: () {
-                // TODO: Navigate to full lessons list
+                Navigator.pushNamed(context, AppRoutes.allLessons);
               },
               child: Text(
                 'See all',
@@ -315,7 +316,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           )
         else
           ...state.dashboard!.todayLessons.map(
-            (lesson) => LessonItem(lesson: lesson),
+            (lesson) => GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.lessonDetail,
+                  arguments: {
+                    'topicId': lesson.id,
+                    'language':
+                        state.dashboard?.continueLearning?.language ?? 'Igbo',
+                    'title': lesson.title,
+                  },
+                );
+              },
+              child: LessonItem(lesson: lesson),
+            ),
           ),
       ],
     );
