@@ -16,6 +16,9 @@ class ApiConstants {
   static const String updateProfile = '$apiPrefix/users/me';
   static const String changePassword = '$apiPrefix/users/me/change-password';
 
+  // Home
+  static const String homeDashboard = '$apiPrefix/home/dashboard';
+
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }
