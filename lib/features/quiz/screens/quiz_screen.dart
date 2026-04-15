@@ -393,8 +393,102 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final isLastQuestion = _currentQuestionIndex == quiz.questions.length - 1;
     final allQuestionsAnswered = _answers.length == quiz.questions.length;
 
+    Widget centerAction;
+
+    if (!hasAnswered) {
+      centerAction = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.divider.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          'Select an answer',
+          style: AppTextStyles.labelMedium.copyWith(color: AppColors.textHint),
+        ),
+      );
+    } else if (!_showExplanation) {
+      centerAction = SizedBox(
+        width: 138,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            setState(() => _showExplanation = true);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.secondary,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            minimumSize: const Size(0, 40),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
+          label: const Text(
+            'Explain',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+          ),
+        ),
+      );
+    } else if (!isLastQuestion) {
+      centerAction = SizedBox(
+        width: 124,
+        child: ElevatedButton(
+          onPressed: () {
+            _pageController.nextPage(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            minimumSize: const Size(0, 40),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Next'),
+              SizedBox(width: 4),
+              Icon(Icons.arrow_forward_ios_rounded, size: 16),
+            ],
+          ),
+        ),
+      );
+    } else {
+      centerAction = SizedBox(
+        width: 140,
+        child: ElevatedButton(
+          onPressed: allQuestionsAnswered ? () => _submitQuiz(quiz) : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.success,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            minimumSize: const Size(0, 40),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Finish Quiz'),
+              SizedBox(width: 4),
+              Icon(Icons.check_circle_rounded, size: 18),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.divider)),
@@ -408,109 +502,34 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       ),
       child: Row(
         children: [
-          if (_currentQuestionIndex > 0)
-            TextButton.icon(
-              onPressed: () {
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              },
-              icon: const Icon(Icons.arrow_back_ios_rounded, size: 18),
-              label: const Text('Previous'),
-            )
-          else
-            const SizedBox(width: 86),
+          SizedBox(
+            width: 98,
+            height: 40,
+            child: _currentQuestionIndex > 0
+                ? TextButton.icon(
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
+                    label: const Text('Previous'),
+                  )
+                : null,
+          ),
           const Spacer(),
-          if (!hasAnswered)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.divider.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                'Select an answer',
-                style: AppTextStyles.labelMedium
-                    .copyWith(color: AppColors.textHint),
-              ),
-            )
-          else if (!_showExplanation)
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 128, maxWidth: 156),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() => _showExplanation = true);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  minimumSize: const Size(0, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
-                label: const FittedBox(child: Text('Explanation')),
-              ),
-            )
-          else if (!isLastQuestion)
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  minimumSize: const Size(0, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Next'),
-                    SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                  ],
-                ),
-              ),
-            )
-          else if (allQuestionsAnswered)
-            SizedBox(
-              width: 136,
-              child: ElevatedButton(
-                onPressed: () => _submitQuiz(quiz),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  minimumSize: const Size(0, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Finish Quiz'),
-                    SizedBox(width: 4),
-                    Icon(Icons.check_circle_rounded, size: 18),
-                  ],
-                ),
-              ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 148),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: centerAction,
             ),
+          ),
         ],
       ),
     );
