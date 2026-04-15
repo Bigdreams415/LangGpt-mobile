@@ -426,45 +426,52 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ),
       );
     } else if (!_showExplanation) {
-      centerAction = SizedBox(
-        width: 116,
-        child: TextButton.icon(
-          onPressed: () {
-            setState(() => _showExplanation = true);
-          },
-          style: navActionStyle(AppColors.secondaryDark),
-          icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
-          label: const Text(
-            'Explain',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
+      centerAction = _PressScale(
+        child: SizedBox(
+          width: 116,
+          child: TextButton.icon(
+            onPressed: () {
+              setState(() => _showExplanation = true);
+            },
+            style: navActionStyle(AppColors.secondaryDark),
+            icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
+            label: const Text(
+              'Explain',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+            ),
           ),
         ),
       );
     } else if (!isLastQuestion) {
-      centerAction = SizedBox(
-        width: 104,
-        child: TextButton.icon(
-          onPressed: () {
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          },
-          style: navActionStyle(AppColors.primary),
-          label: const Text('Next'),
-          icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+      centerAction = _PressScale(
+        child: SizedBox(
+          width: 104,
+          child: TextButton.icon(
+            onPressed: () {
+              _pageController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+            },
+            style: navActionStyle(AppColors.primary),
+            label: const Text('Next'),
+            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          ),
         ),
       );
     } else {
-      centerAction = SizedBox(
-        width: 118,
-        child: TextButton.icon(
-          onPressed: allQuestionsAnswered ? () => _submitQuiz(quiz) : null,
-          style: navActionStyle(AppColors.success),
-          label: const Text('Finish'),
-          icon: const Icon(Icons.check_circle_rounded, size: 16),
+      centerAction = _PressScale(
+        enabled: allQuestionsAnswered,
+        child: SizedBox(
+          width: 118,
+          child: TextButton.icon(
+            onPressed: allQuestionsAnswered ? () => _submitQuiz(quiz) : null,
+            style: navActionStyle(AppColors.success),
+            label: const Text('Finish'),
+            icon: const Icon(Icons.check_circle_rounded, size: 16),
+          ),
         ),
       );
     }
@@ -488,26 +495,28 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             width: 98,
             height: 40,
             child: _currentQuestionIndex > 0
-                ? TextButton.icon(
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      visualDensity: VisualDensity.compact,
-                      minimumSize: const Size(0, 40),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                            color: AppColors.primary.withOpacity(0.24)),
+                ? _PressScale(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        visualDensity: VisualDensity.compact,
+                        minimumSize: const Size(0, 40),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(
+                              color: AppColors.primary.withOpacity(0.24)),
+                        ),
                       ),
+                      icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
+                      label: const Text('Prev'),
                     ),
-                    icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
-                    label: const Text('Prev'),
                   )
                 : null,
           ),
@@ -677,6 +686,50 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: const Text('Quit'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  final bool enabled;
+
+  const _PressScale({
+    required this.child,
+    this.enabled = true,
+  });
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: widget.enabled
+          ? (_) {
+              if (!_pressed) setState(() => _pressed = true);
+            }
+          : null,
+      onPointerUp: widget.enabled
+          ? (_) {
+              if (_pressed) setState(() => _pressed = false);
+            }
+          : null,
+      onPointerCancel: widget.enabled
+          ? (_) {
+              if (_pressed) setState(() => _pressed = false);
+            }
+          : null,
+      child: AnimatedScale(
+        scale: _pressed ? 0.98 : 1,
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        child: widget.child,
       ),
     );
   }
