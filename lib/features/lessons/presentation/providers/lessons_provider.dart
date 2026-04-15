@@ -68,6 +68,39 @@ class LessonDetailState {
   }
 }
 
+// ─── Lesson Response State ──────────────────────────────────────────────────
+
+enum LessonResponseStatus { initial, loading, loaded, error }
+
+class LessonResponseState {
+  final LessonResponseStatus status;
+  final LessonResponseModel? lesson;
+  final String? errorMessage;
+
+  const LessonResponseState({
+    required this.status,
+    this.lesson,
+    this.errorMessage,
+  });
+
+  const LessonResponseState.initial()
+      : status = LessonResponseStatus.initial,
+        lesson = null,
+        errorMessage = null;
+
+  LessonResponseState copyWith({
+    LessonResponseStatus? status,
+    LessonResponseModel? lesson,
+    String? errorMessage,
+  }) {
+    return LessonResponseState(
+      status: status ?? this.status,
+      lesson: lesson ?? this.lesson,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
 // ─── Lessons Notifier ───────────────────────────────────────────────────────
 
 class LessonsNotifier extends StateNotifier<LessonsListState> {
@@ -81,7 +114,8 @@ class LessonsNotifier extends StateNotifier<LessonsListState> {
   }) async {
     if (state.status == LessonsListStatus.loaded) return;
 
-    state = state.copyWith(status: LessonsListStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: LessonsListStatus.loading, errorMessage: null);
 
     try {
       final lessonsList = await _repo.getLessonsList(
@@ -104,7 +138,8 @@ class LessonsNotifier extends StateNotifier<LessonsListState> {
     required String language,
     String? level,
   }) async {
-    state = state.copyWith(status: LessonsListStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: LessonsListStatus.loading, errorMessage: null);
 
     try {
       final lessonsList = await _repo.getLessonsList(
@@ -135,7 +170,8 @@ class LessonDetailNotifier extends StateNotifier<LessonDetailState> {
     required String language,
     required String topicId,
   }) async {
-    state = state.copyWith(status: LessonDetailStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: LessonDetailStatus.loading, errorMessage: null);
 
     try {
       final lesson = await _repo.getLessonDetail(
@@ -159,12 +195,63 @@ class LessonDetailNotifier extends StateNotifier<LessonDetailState> {
   }
 }
 
+// ─── Lesson Response Notifier ───────────────────────────────────────────────
+
+class LessonResponseNotifier extends StateNotifier<LessonResponseState> {
+  LessonResponseNotifier() : super(const LessonResponseState.initial());
+
+  final _repo = LessonsRepositoryImpl.instance;
+
+  Future<void> generateLesson({
+    required String language,
+    required String level,
+    required String unit,
+    required int subtopicIndex,
+    String? subtopicName,
+  }) async {
+    state = state.copyWith(
+      status: LessonResponseStatus.loading,
+      errorMessage: null,
+    );
+
+    try {
+      final lesson = await _repo.generateLesson(
+        language: language,
+        level: level,
+        unit: unit,
+        subtopicIndex: subtopicIndex,
+        subtopicName: subtopicName,
+      );
+      state = LessonResponseState(
+        status: LessonResponseStatus.loaded,
+        lesson: lesson,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: LessonResponseStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  void reset() {
+    state = const LessonResponseState.initial();
+  }
+}
+
 // ─── Providers ──────────────────────────────────────────────────────────────
 
-final lessonsListProvider = StateNotifierProvider<LessonsNotifier, LessonsListState>((ref) {
+final lessonsListProvider =
+    StateNotifierProvider<LessonsNotifier, LessonsListState>((ref) {
   return LessonsNotifier();
 });
 
-final lessonDetailProvider = StateNotifierProvider<LessonDetailNotifier, LessonDetailState>((ref) {
+final lessonDetailProvider =
+    StateNotifierProvider<LessonDetailNotifier, LessonDetailState>((ref) {
   return LessonDetailNotifier();
+});
+
+final lessonResponseProvider =
+    StateNotifierProvider<LessonResponseNotifier, LessonResponseState>((ref) {
+  return LessonResponseNotifier();
 });

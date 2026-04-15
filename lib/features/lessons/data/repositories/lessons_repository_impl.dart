@@ -33,4 +33,21 @@ class LessonsRepositoryImpl implements LessonsRepository {
       topicId: topicId,
     );
   }
+
+  @override
+  Future<LessonResponseModel> generateLesson({
+    required String language,
+    required String level,
+    required String unit,
+    required int subtopicIndex,
+    String? subtopicName,
+  }) async {
+    return await _remoteDataSource.generateLesson(
+      language: language,
+      level: level,
+      unit: unit,
+      subtopicIndex: subtopicIndex,
+      subtopicName: subtopicName,
+    );
+  }
 }

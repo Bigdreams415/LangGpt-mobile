@@ -24,7 +24,8 @@ class LessonsRemoteDataSource {
           'offset': offset,
         },
       );
-      return LessonsListResponseModel.fromJson(response.data as Map<String, dynamic>);
+      return LessonsListResponseModel.fromJson(
+          response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -39,6 +40,31 @@ class LessonsRemoteDataSource {
         '${ApiConstants.lessonDetail}/$language/$topicId',
       );
       return LessonDetailModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<LessonResponseModel> generateLesson({
+    required String language,
+    required String level,
+    required String unit,
+    required int subtopicIndex,
+    String? subtopicName,
+  }) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.generateLesson,
+        data: {
+          'language': language,
+          'level': level,
+          'unit': unit,
+          'subtopic_index': subtopicIndex,
+          if (subtopicName != null) 'subtopic_name': subtopicName,
+        },
+      );
+      return LessonResponseModel.fromJson(
+          response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
     }

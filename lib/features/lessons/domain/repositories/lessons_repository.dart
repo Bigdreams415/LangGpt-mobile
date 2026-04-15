@@ -12,4 +12,12 @@ abstract class LessonsRepository {
     required String language,
     required String topicId,
   });
+
+  Future<LessonResponseModel> generateLesson({
+    required String language,
+    required String level,
+    required String unit,
+    required int subtopicIndex,
+    String? subtopicName,
+  });
 }

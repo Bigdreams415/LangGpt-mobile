@@ -48,7 +48,8 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -101,6 +102,10 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
       return const Center(child: Text('Lesson not found'));
     }
 
+    final content = lesson.content;
+    final vocabulary = (content['vocabulary'] as List?) ?? const [];
+    final phrases = (content['phrases'] as List?) ?? const [];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -133,7 +138,8 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.secondarySurface,
                       borderRadius: BorderRadius.circular(100),
@@ -157,22 +163,27 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
             style: AppTextStyles.headlineSmall,
           ),
           const SizedBox(height: 12),
-          ...lesson.content.vocabulary.map((item) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(item.word, style: AppTextStyles.labelLarge),
-                    Text(item.translation, style: AppTextStyles.bodyMedium),
-                  ],
-                ),
-              )),
+          ...vocabulary.map((item) {
+            final row = item as Map<String, dynamic>;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text((row['word'] ?? '') as String,
+                      style: AppTextStyles.labelLarge),
+                  Text((row['translation'] ?? '') as String,
+                      style: AppTextStyles.bodyMedium),
+                ],
+              ),
+            );
+          }),
           const SizedBox(height: 24),
 
           // Phrases Section
@@ -181,23 +192,31 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
             style: AppTextStyles.headlineSmall,
           ),
           const SizedBox(height: 12),
-          ...lesson.content.phrases.map((item) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.phrase, style: AppTextStyles.labelLarge),
-                    const SizedBox(height: 4),
-                    Text(item.translation, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
-                  ],
-                ),
-              )),
+          ...phrases.map((item) {
+            final row = item as Map<String, dynamic>;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text((row['phrase'] ?? '') as String,
+                      style: AppTextStyles.labelLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    (row['translation'] ?? '') as String,
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            );
+          }),
           const SizedBox(height: 32),
 
           // Start Practice Button

@@ -4,7 +4,7 @@ import '../../../core/constants/app_text_styles.dart';
 import '../data/models/lesson_model.dart';
 
 class LessonTopicCard extends StatelessWidget {
-  final LessonTopicModel topic;
+  final LessonUnitModel topic;
   final String language;
   final VoidCallback onTap;
 
@@ -71,7 +71,8 @@ class LessonTopicCard extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: AppColors.secondarySurface,
                               borderRadius: BorderRadius.circular(100),

@@ -21,8 +21,13 @@ class ApiConstants {
 
   // Lessons
   static const String lessonsList = '$apiPrefix/lessons/list';
-  static const String lessonDetail = '$apiPrefix/lessons/topic';
+  static const String lessonDetail = '$apiPrefix/lessons/unit';
+  static const String generateLesson = '$apiPrefix/lessons/';  
+  
+  // Quiz
+  static const String generateQuiz = '$apiPrefix/quiz/';
+  static const String checkAnswer = '$apiPrefix/quiz/check';
 
-  static const Duration connectTimeout = Duration(seconds: 15);
+  static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }
