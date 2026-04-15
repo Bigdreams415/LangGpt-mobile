@@ -394,7 +394,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final allQuestionsAnswered = _answers.length == quiz.questions.length;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.divider)),
@@ -420,14 +420,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               label: const Text('Previous'),
             )
           else
-            const SizedBox(width: 100),
+            const SizedBox(width: 86),
           const Spacer(),
           if (!hasAnswered)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.divider.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 'Select an answer',
@@ -436,24 +436,29 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
             )
           else if (!_showExplanation)
-            SizedBox(
-              width: 140,
-              child: ElevatedButton(
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 128, maxWidth: 156),
+              child: ElevatedButton.icon(
                 onPressed: () {
                   setState(() => _showExplanation = true);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  minimumSize: const Size(0, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Show Explanation'),
+                icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
+                label: const FittedBox(child: Text('Explanation')),
               ),
             )
           else if (!isLastQuestion)
             SizedBox(
-              width: 140,
+              width: 120,
               child: ElevatedButton(
                 onPressed: () {
                   _pageController.nextPage(
@@ -463,8 +468,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  minimumSize: const Size(0, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: const Row(
@@ -479,13 +488,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             )
           else if (allQuestionsAnswered)
             SizedBox(
-              width: 160,
+              width: 136,
               child: ElevatedButton(
                 onPressed: () => _submitQuiz(quiz),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.success,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  minimumSize: const Size(0, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: const Row(

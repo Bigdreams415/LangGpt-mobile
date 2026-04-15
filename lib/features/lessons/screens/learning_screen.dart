@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../data/models/lesson_model.dart';
 import '../presentation/providers/lessons_provider.dart';
+import '../../quiz/screens/quiz_screen.dart';
 import '../widgets/flashcard_widget.dart';
 import '../widgets/progress_indicator_widget.dart';
 import '../widgets/vocabulary_list.dart';
@@ -329,53 +330,25 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          if (lesson.nextSubtopic != null) ...[
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LearningScreen(
-                        language: widget.language,
-                        level: widget.level,
-                        unitId: widget.unitId,
-                        subtopicIndex: widget.subtopicIndex + 1,
-                        unitTitle: widget.unitTitle,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Continue to Next Lesson',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 20),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
           SizedBox(
             width: double.infinity,
             height: 56,
             child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizScreen(
+                      language: widget.language,
+                      level: widget.level,
+                      unitId: widget.unitId,
+                      subtopicIndex: widget.subtopicIndex,
+                      unitTitle: widget.unitTitle,
+                      subtopicName: lesson.subtopic,
+                    ),
+                  ),
+                );
+              },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(

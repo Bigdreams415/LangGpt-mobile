@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../progress/data/datasources/progress_remote_datasource.dart';
+import '../../progress/data/models/progress_model.dart';
 import '../presentation/providers/home_provider.dart';
 import '../data/models/home_dashboard_model.dart';
 import '../widgets/streak_badge.dart';
@@ -21,13 +24,52 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _progressDataSource = ProgressRemoteDataSource.instance;
+  ProgressResponseModel? _progress;
+
   @override
   void initState() {
     super.initState();
     // Load home data when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeProvider.notifier).loadDashboard();
+      _loadProgress();
     });
+  }
+
+  Future<void> _loadProgress() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final language = user.selectedLanguage ?? 'Igbo';
+    try {
+      final progress = await _progressDataSource.getProgress(
+        userId: user.id,
+        language: language,
+      );
+      if (!mounted) return;
+      setState(() => _progress = progress);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _progress = null);
+    }
+  }
+
+  bool _isTopicUnlocked({required String topicId, required HomeState state}) {
+    final progress = _progress;
+
+    if (progress == null) {
+      final currentFromDashboard = state.dashboard?.continueLearning?.topic;
+      if (currentFromDashboard != null && currentFromDashboard.isNotEmpty) {
+        return topicId == currentFromDashboard;
+      }
+      return true;
+    }
+
+    final completedUnits = progress.completedUnits.toSet();
+    if (completedUnits.contains(topicId)) return true;
+    if (progress.currentUnit.isNotEmpty) return progress.currentUnit == topicId;
+    return false;
   }
 
   @override
@@ -38,7 +80,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => ref.read(homeProvider.notifier).refreshDashboard(),
+          onRefresh: () async {
+            await Future.wait([
+              ref.read(homeProvider.notifier).refreshDashboard(),
+              _loadProgress(),
+            ]);
+          },
           color: AppColors.primary,
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -316,21 +363,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           )
         else
           ...state.dashboard!.todayLessons.map(
-            (lesson) => GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.lessonDetail,
-                  arguments: {
-                    'topicId': lesson.id,
-                    'language':
-                        state.dashboard?.continueLearning?.language ?? 'Igbo',
-                    'title': lesson.title,
-                  },
-                );
-              },
-              child: LessonItem(lesson: lesson),
-            ),
+            (lesson) {
+              final isUnlocked =
+                  _isTopicUnlocked(topicId: lesson.id, state: state);
+              return GestureDetector(
+                onTap: () {
+                  if (!isUnlocked) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Pass the current quiz (80%+) to unlock this topic.'),
+                      ),
+                    );
+                    return;
+                  }
+
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.lessonDetail,
+                    arguments: {
+                      'topicId': lesson.id,
+                      'language':
+                          state.dashboard?.continueLearning?.language ?? 'Igbo',
+                      'title': lesson.title,
+                    },
+                  );
+                },
+                child: LessonItem(
+                  lesson: lesson,
+                  isLocked: !isUnlocked,
+                ),
+              );
+            },
           ),
       ],
     );

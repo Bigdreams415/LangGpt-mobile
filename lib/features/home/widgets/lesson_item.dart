@@ -5,10 +5,12 @@ import '../data/models/home_dashboard_model.dart';
 
 class LessonItem extends StatelessWidget {
   final TodayLessonModel lesson;
+  final bool isLocked;
 
   const LessonItem({
     super.key,
     required this.lesson,
+    this.isLocked = false,
   });
 
   @override
@@ -17,7 +19,7 @@ class LessonItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isLocked ? AppColors.surfaceVariant : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider, width: 1),
       ),
@@ -68,6 +70,20 @@ class LessonItem extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.check_rounded,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                )
+              else if (isLocked)
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: AppColors.textHint,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_rounded,
                     color: Colors.white,
                     size: 14,
                   ),

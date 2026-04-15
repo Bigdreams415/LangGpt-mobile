@@ -6,12 +6,14 @@ import '../data/models/lesson_model.dart';
 class LessonTopicCard extends StatelessWidget {
   final LessonUnitModel topic;
   final String language;
+  final bool isLocked;
   final VoidCallback onTap;
 
   const LessonTopicCard({
     super.key,
     required this.topic,
     required this.language,
+    this.isLocked = false,
     required this.onTap,
   });
 
@@ -27,9 +29,13 @@ class LessonTopicCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: isLocked ? AppColors.surfaceVariant : AppColors.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.divider),
+              border: Border.all(
+                color: isLocked
+                    ? AppColors.textHint.withOpacity(0.3)
+                    : AppColors.divider,
+              ),
             ),
             child: Row(
               children: [
@@ -117,6 +123,12 @@ class LessonTopicCard extends StatelessWidget {
                       color: Colors.white,
                       size: 16,
                     ),
+                  )
+                else if (isLocked)
+                  const Icon(
+                    Icons.lock_rounded,
+                    size: 18,
+                    color: AppColors.textHint,
                   )
                 else
                   Icon(

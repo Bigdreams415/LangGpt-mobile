@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../progress/data/datasources/progress_remote_datasource.dart';
+import '../../progress/data/models/progress_model.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../presentation/providers/lessons_provider.dart';
 import '../widgets/lesson_topic_card.dart';
@@ -15,11 +17,15 @@ class AllLessonsScreen extends ConsumerStatefulWidget {
 }
 
 class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
+  final _progressDataSource = ProgressRemoteDataSource.instance;
+  ProgressResponseModel? _progress;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadLessons();
+      _loadProgress();
     });
   }
 
@@ -34,6 +40,51 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
         );
   }
 
+  Future<void> _loadProgress() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final language = user.selectedLanguage ?? 'Igbo';
+    try {
+      final progress = await _progressDataSource.getProgress(
+        userId: user.id,
+        language: language,
+      );
+      if (!mounted) return;
+      setState(() => _progress = progress);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _progress = null);
+    }
+  }
+
+  bool _isTopicUnlocked({
+    required String topicId,
+    required List<dynamic> allTopics,
+    required int index,
+  }) {
+    final progress = _progress;
+    if (progress == null) {
+      return index == 0;
+    }
+
+    final completedUnits = progress.completedUnits.toSet();
+    if (completedUnits.contains(topicId)) return true;
+
+    if (progress.currentUnit.isNotEmpty) {
+      return progress.currentUnit == topicId;
+    }
+
+    final firstUncompleted = allTopics
+        .cast<dynamic>()
+        .firstWhere(
+          (topic) => !completedUnits.contains(topic.id as String),
+          orElse: () => allTopics.first,
+        )
+        .id as String;
+    return firstUncompleted == topicId;
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
@@ -46,7 +97,8 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -56,10 +108,15 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
         centerTitle: true,
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(lessonsListProvider.notifier).refreshLessonsList(
-              language: language,
-              level: user?.level,
-            ),
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(lessonsListProvider.notifier).refreshLessonsList(
+                  language: language,
+                  level: user?.level,
+                ),
+            _loadProgress(),
+          ]);
+        },
         color: AppColors.primary,
         child: _buildContent(lessonsState),
       ),
@@ -111,10 +168,26 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
       itemCount: state.lessonsList!.topics.length,
       itemBuilder: (context, index) {
         final topic = state.lessonsList!.topics[index];
+        final unlocked = _isTopicUnlocked(
+          topicId: topic.id,
+          allTopics: state.lessonsList!.topics,
+          index: index,
+        );
+
         return LessonTopicCard(
           topic: topic,
           language: state.lessonsList!.language,
+          isLocked: !unlocked,
           onTap: () {
+            if (!unlocked) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Pass the current quiz (80%+) to unlock this topic.'),
+                ),
+              );
+              return;
+            }
             Navigator.pushNamed(
               context,
               '/lesson-detail',
