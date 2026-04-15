@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -35,6 +37,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   final Map<int, String> _answers = {};
   final Map<int, bool> _answerCorrectness = {};
   bool _showExplanation = false;
+  Timer? _explanationTimer;
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   void dispose() {
+    _explanationTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -393,6 +397,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final isLastQuestion = _currentQuestionIndex == quiz.questions.length - 1;
     final allQuestionsAnswered = _answers.length == quiz.questions.length;
 
+    ButtonStyle navActionStyle(Color textColor) {
+      return TextButton.styleFrom(
+        foregroundColor: textColor,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        minimumSize: const Size(0, 40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: textColor.withOpacity(0.24)),
+        ),
+      );
+    }
+
     Widget centerAction;
 
     if (!hasAnswered) {
@@ -409,20 +427,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       );
     } else if (!_showExplanation) {
       centerAction = SizedBox(
-        width: 138,
-        child: ElevatedButton.icon(
+        width: 116,
+        child: TextButton.icon(
           onPressed: () {
             setState(() => _showExplanation = true);
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.secondary,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            minimumSize: const Size(0, 40),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+          style: navActionStyle(AppColors.secondaryDark),
           icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
           label: const Text(
             'Explain',
@@ -434,55 +444,27 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       );
     } else if (!isLastQuestion) {
       centerAction = SizedBox(
-        width: 124,
-        child: ElevatedButton(
+        width: 104,
+        child: TextButton.icon(
           onPressed: () {
             _pageController.nextPage(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             );
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            minimumSize: const Size(0, 40),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Next'),
-              SizedBox(width: 4),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16),
-            ],
-          ),
+          style: navActionStyle(AppColors.primary),
+          label: const Text('Next'),
+          icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
         ),
       );
     } else {
       centerAction = SizedBox(
-        width: 140,
-        child: ElevatedButton(
+        width: 118,
+        child: TextButton.icon(
           onPressed: allQuestionsAnswered ? () => _submitQuiz(quiz) : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            minimumSize: const Size(0, 40),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Finish Quiz'),
-              SizedBox(width: 4),
-              Icon(Icons.check_circle_rounded, size: 18),
-            ],
-          ),
+          style: navActionStyle(AppColors.success),
+          label: const Text('Finish'),
+          icon: const Icon(Icons.check_circle_rounded, size: 16),
         ),
       );
     }
@@ -516,15 +498,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(0, 40),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                            color: AppColors.primary.withOpacity(0.24)),
+                      ),
                     ),
                     icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
-                    label: const Text('Previous'),
+                    label: const Text('Prev'),
                   )
                 : null,
           ),
           const Spacer(),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 148),
+            constraints: const BoxConstraints(maxWidth: 118),
             child: Align(
               alignment: Alignment.centerRight,
               child: centerAction,
@@ -537,11 +526,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   Future<void> _handleAnswerSelection(
       QuizQuestionModel question, String selectedAnswer) async {
+    final answeredIndex = _currentQuestionIndex;
     final isCorrect = selectedAnswer == question.correctAnswer;
 
     setState(() {
-      _answers[_currentQuestionIndex] = selectedAnswer;
-      _answerCorrectness[_currentQuestionIndex] = isCorrect;
+      _answers[answeredIndex] = selectedAnswer;
+      _answerCorrectness[answeredIndex] = isCorrect;
     });
 
     // Get AI feedback
@@ -554,6 +544,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           );
 
       if (mounted && feedback != null) {
+        final message = isCorrect ? feedback.encouragement : feedback.feedback;
+        final visibleSeconds = message.length > 220 ? 8 : 5;
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -567,7 +560,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    isCorrect ? feedback.encouragement : feedback.feedback,
+                    message,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -576,7 +571,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: visibleSeconds),
           ),
         );
       }
@@ -585,10 +580,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
 
     // Auto-show explanation after a short delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() => _showExplanation = true);
-      }
+    _explanationTimer?.cancel();
+    _explanationTimer = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      // Prevent previous-question callbacks from affecting later questions.
+      if (_currentQuestionIndex != answeredIndex) return;
+      if (!_answers.containsKey(answeredIndex)) return;
+      setState(() => _showExplanation = true);
     });
   }
 
