@@ -37,6 +37,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     super.initState();
     _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(lessonResponseProvider.notifier).generateLesson(
             language: widget.language,
             level: widget.level,
@@ -49,7 +50,6 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    ref.read(lessonResponseProvider.notifier).reset();
     super.dispose();
   }
 
@@ -466,7 +466,12 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
             child: const Text('Stay'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+              if (mounted) {
+                Navigator.pop(this.context);
+              }
+            },
             child: const Text('Exit'),
           ),
         ],

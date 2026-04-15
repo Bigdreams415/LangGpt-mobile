@@ -178,11 +178,13 @@ class LessonDetailNotifier extends StateNotifier<LessonDetailState> {
         language: language,
         topicId: topicId,
       );
+      if (!mounted) return;
       state = LessonDetailState(
         status: LessonDetailStatus.loaded,
         lesson: lesson,
       );
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         status: LessonDetailStatus.error,
         errorMessage: e.toString(),
@@ -222,11 +224,13 @@ class LessonResponseNotifier extends StateNotifier<LessonResponseState> {
         subtopicIndex: subtopicIndex,
         subtopicName: subtopicName,
       );
+      if (!mounted) return;
       state = LessonResponseState(
         status: LessonResponseStatus.loaded,
         lesson: lesson,
       );
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         status: LessonResponseStatus.error,
         errorMessage: e.toString(),
@@ -247,11 +251,12 @@ final lessonsListProvider =
 });
 
 final lessonDetailProvider =
-    StateNotifierProvider<LessonDetailNotifier, LessonDetailState>((ref) {
+    AutoDisposeStateNotifierProvider<LessonDetailNotifier, LessonDetailState>(
+        (ref) {
   return LessonDetailNotifier();
 });
 
-final lessonResponseProvider =
-    StateNotifierProvider<LessonResponseNotifier, LessonResponseState>((ref) {
+final lessonResponseProvider = AutoDisposeStateNotifierProvider<
+    LessonResponseNotifier, LessonResponseState>((ref) {
   return LessonResponseNotifier();
 });

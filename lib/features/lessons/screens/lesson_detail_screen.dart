@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../presentation/providers/lessons_provider.dart';
+import 'learning_screen.dart';
 
 class LessonDetailScreen extends ConsumerStatefulWidget {
   final String topicId;
@@ -25,6 +26,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(lessonDetailProvider.notifier).loadLessonDetail(
             language: widget.language,
             topicId: widget.topicId,
@@ -34,7 +36,6 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
 
   @override
   void dispose() {
-    ref.read(lessonDetailProvider.notifier).reset();
     super.dispose();
   }
 
@@ -225,9 +226,17 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
             height: 56,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to practice/quiz
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Practice coming soon!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LearningScreen(
+                      language: widget.language,
+                      level: lesson.level,
+                      unitId: lesson.id,
+                      subtopicIndex: 0,
+                      unitTitle: lesson.title,
+                    ),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
