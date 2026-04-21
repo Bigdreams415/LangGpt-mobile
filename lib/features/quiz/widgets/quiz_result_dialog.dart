@@ -8,6 +8,7 @@ class QuizResultDialog extends StatefulWidget {
   final int correctCount;
   final int totalQuestions;
   final bool passed;
+  final bool isPractice;
   final VoidCallback? onContinue;
   final VoidCallback? onRetry;
   final VoidCallback onClose;
@@ -18,6 +19,7 @@ class QuizResultDialog extends StatefulWidget {
     required this.correctCount,
     required this.totalQuestions,
     required this.passed,
+    this.isPractice = false,
     this.onContinue,
     this.onRetry,
     required this.onClose,
@@ -33,7 +35,8 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
     if (widget.passed) {
       _confettiController.play();
     }
@@ -50,7 +53,8 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
     return Stack(
       children: [
         Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           child: Container(
             padding: const EdgeInsets.all(24),
             constraints: const BoxConstraints(maxWidth: 400),
@@ -78,38 +82,45 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
                               colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
                             )
                           : LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryDark],
+                              colors: [
+                                AppColors.primary,
+                                AppColors.primaryDark
+                              ],
                             ),
                       boxShadow: [
                         BoxShadow(
-                          color: (widget.passed ? Colors.green : AppColors.primary)
-                              .withOpacity(0.3),
+                          color:
+                              (widget.passed ? Colors.green : AppColors.primary)
+                                  .withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
                       ],
                     ),
                     child: Icon(
-                      widget.passed ? Icons.emoji_events_rounded : Icons.school_rounded,
+                      widget.passed
+                          ? Icons.emoji_events_rounded
+                          : Icons.school_rounded,
                       color: Colors.white,
                       size: 50,
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Title
                 Text(
                   widget.passed ? 'Congratulations! 🎉' : 'Keep Practicing! 💪',
                   style: AppTextStyles.headlineMedium.copyWith(
-                    color: widget.passed ? AppColors.success : AppColors.primary,
+                    color:
+                        widget.passed ? AppColors.success : AppColors.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Score with animation
                 TweenAnimationBuilder(
                   tween: IntTween(begin: 0, end: widget.score),
@@ -120,20 +131,23 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
                       '$value%',
                       style: AppTextStyles.displaySmall.copyWith(
                         fontSize: 48,
-                        color: widget.passed ? AppColors.success : AppColors.primary,
+                        color: widget.passed
+                            ? AppColors.success
+                            : AppColors.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     );
                   },
                 ),
-                
+
                 Text(
                   '${widget.correctCount} out of ${widget.totalQuestions} correct',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppColors.textSecondary),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Pass/Fail Message
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -149,22 +163,59 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
                     ),
                   ),
                   child: Text(
-                    widget.passed
-                        ? 'Excellent! You\'ve mastered this topic. Ready to continue your learning journey?'
-                        : 'You need 80% to pass. Don\'t worry - review the material and try again!',
+                    widget.isPractice
+                        ? 'Practice completed! Great job reviewing your material.'
+                        : widget.passed
+                            ? 'Excellent! You\'ve mastered this topic. Ready to continue your learning journey?'
+                            : 'You need 80% to pass. Don\'t worry - review the material and try again!',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: widget.passed ? AppColors.success : AppColors.textPrimary,
+                      color: widget.passed
+                          ? AppColors.success
+                          : AppColors.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Actions
                 Row(
                   children: [
-                    if (!widget.passed) ...[
+                    if (widget.isPractice) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            widget.onClose();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text('Back to Practice'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            widget.onRetry?.call();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text('Take Another'),
+                        ),
+                      ),
+                    ] else if (!widget.passed) ...[
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
@@ -228,7 +279,7 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
             ),
           ),
         ),
-        
+
         // Confetti overlay
         Align(
           alignment: Alignment.topCenter,

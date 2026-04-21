@@ -16,6 +16,7 @@ class QuizScreen extends ConsumerStatefulWidget {
   final int subtopicIndex;
   final String unitTitle;
   final String subtopicName;
+  final bool isPractice;
 
   const QuizScreen({
     super.key,
@@ -25,6 +26,7 @@ class QuizScreen extends ConsumerStatefulWidget {
     required this.subtopicIndex,
     required this.unitTitle,
     required this.subtopicName,
+    this.isPractice = false,
   });
 
   @override
@@ -604,13 +606,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         _answerCorrectness.values.where((correct) => correct).length;
     final score = ((correctCount / quiz.questions.length) * 100).round();
 
-    final passed = await ref.read(quizProvider.notifier).submitQuizResults(
-          unit: widget.unitId,
-          subtopicIndex: widget.subtopicIndex,
-          subtopicName: widget.subtopicName,
-          level: widget.level,
-          score: score,
-        );
+    final passed = widget.isPractice
+        ? score >= 80
+        : await ref.read(quizProvider.notifier).submitQuizResults(
+              unit: widget.unitId,
+              subtopicIndex: widget.subtopicIndex,
+              subtopicName: widget.subtopicName,
+              level: widget.level,
+              score: score,
+            );
 
     if (mounted) {
       showDialog(
@@ -621,13 +625,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           correctCount: correctCount,
           totalQuestions: quiz.questions.length,
           passed: passed,
-          onContinue: passed
+          isPractice: widget.isPractice,
+          onContinue: passed || widget.isPractice
               ? () {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context, true); // Return with success
                 }
               : null,
-          onRetry: passed
+          onRetry: passed && !widget.isPractice
               ? null
               : () {
                   Navigator.pop(context); // Close dialog
@@ -635,7 +640,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 },
           onClose: () {
             Navigator.pop(context); // Close dialog
-            if (!passed) {
+            // If they failed a real quiz, go back. If practice, they can just exit too.
+            if (!passed && !widget.isPractice) {
+              Navigator.pop(context); // Go back
+            } else if (widget.isPractice) {
               Navigator.pop(context); // Go back
             }
           },

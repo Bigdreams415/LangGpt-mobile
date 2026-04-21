@@ -1,7 +1,7 @@
 class AppStrings {
   AppStrings._();
 
-  static const String appName = 'LangGPT';
+  static const String appName = 'KinSpeak';
   static const String appTagline = 'Learn Nigerian languages\nthe fun way';
 
   // Auth
