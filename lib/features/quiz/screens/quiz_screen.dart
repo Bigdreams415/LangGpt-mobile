@@ -40,11 +40,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   final Map<int, bool> _answerCorrectness = {};
   bool _showExplanation = false;
   Timer? _explanationTimer;
+  Timer? _loadingTicker;
+  double _loadingProgress = 0;
+
+  static const List<String> _loadingMessages = [
+    'Preparing your quiz...',
+    'Matching questions to your current topic...',
+    'Balancing difficulty for your level...',
+    'Adding smart explanations...',
+    'Your quiz will be ready soon...',
+  ];
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(quizProvider.notifier).generateQuiz(
             language: widget.language,
@@ -59,12 +70,120 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   @override
   void dispose() {
     _explanationTimer?.cancel();
+    _loadingTicker?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
+  void _startLoadingAnimation() {
+    _loadingTicker?.cancel();
+    if (mounted) {
+      setState(() => _loadingProgress = 0);
+    }
+
+    _loadingTicker = Timer.periodic(const Duration(milliseconds: 140), (_) {
+      if (!mounted) return;
+      setState(() {
+        // Move quickly at first then slow down, keeping a little headroom.
+        if (_loadingProgress < 0.6) {
+          _loadingProgress += 0.03;
+        } else if (_loadingProgress < 0.85) {
+          _loadingProgress += 0.015;
+        } else if (_loadingProgress < 0.95) {
+          _loadingProgress += 0.005;
+        }
+
+        if (_loadingProgress > 0.95) {
+          _loadingProgress = 0.95;
+        }
+      });
+    });
+  }
+
+  void _stopLoadingAnimation() {
+    _loadingTicker?.cancel();
+    _loadingTicker = null;
+    if (!mounted) return;
+    setState(() => _loadingProgress = 0);
+  }
+
+  Widget _buildLoadingState() {
+    final progress = _loadingProgress.clamp(0.0, 1.0);
+    final percent = (progress * 100).round();
+    final messageIndex = ((_loadingMessages.length - 1) * progress)
+        .floor()
+        .clamp(0, _loadingMessages.length - 1);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.primarySurface,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: AppColors.primary,
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: 24),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              child: Text(
+                _loadingMessages[messageIndex],
+                key: ValueKey<int>(messageIndex),
+                style: AppTextStyles.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'We are building questions just for you',
+              style:
+                  AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 10,
+                backgroundColor: AppColors.divider,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '$percent%',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<QuizState>(quizProvider, (previous, next) {
+      if (next.status == QuizStatus.loading) {
+        _startLoadingAnimation();
+      } else {
+        _stopLoadingAnimation();
+      }
+    });
+
     final quizState = ref.watch(quizProvider);
 
     return Scaffold(
@@ -127,16 +246,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   Widget _buildContent(QuizState state) {
     if (state.status == QuizStatus.loading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Preparing your quiz...'),
-          ],
-        ),
-      );
+      return _buildLoadingState();
     }
 
     if (state.status == QuizStatus.submitting) {
