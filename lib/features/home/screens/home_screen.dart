@@ -95,28 +95,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 const SizedBox(height: 20),
 
-                // ── Top Bar with real user data ────────────────────────────
+                // Top Bar with real user data 
                 _buildTopBar(homeState),
                 const SizedBox(height: 24),
 
-                // ── Daily Goal Progress ───────────────────────────────────
+                // Daily Goal Progress 
                 _buildDailyGoalCard(homeState),
                 const SizedBox(height: 24),
 
-                // ── Continue Lesson ───────────────────────────────────────
+                // Continue Lesson 
                 if (homeState.status == HomeStatus.loaded)
                   _buildContinueLearningSection(homeState.dashboard),
                 const SizedBox(height: 24),
 
-                // ── Stats Row ─────────────────────────────────────────────
+                // Stats Row 
                 _buildStatsRow(homeState),
                 const SizedBox(height: 24),
 
-                // ── Today's Topics ────────────────────────────────────────
+                // Today's Topics 
                 _buildTodayLessonsSection(homeState),
                 const SizedBox(height: 24),
 
-                // ── Leaderboard preview ───────────────────────────────────
+                // Leaderboard preview 
                 _buildLeaderboardSection(homeState),
                 const SizedBox(height: 32),
               ],
@@ -127,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ─── Top Bar Builder ───────────────────────────────────────────────────────
+  // Top Bar Builder 
   Widget _buildTopBar(HomeState state) {
     return Row(
       children: [
@@ -218,7 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return 'Mgbede ọma 🌙';
   }
 
-  // ─── Daily Goal Card Builder ───────────────────────────────────────────────
+  // Daily Goal Card Builder 
   Widget _buildDailyGoalCard(HomeState state) {
     if (state.status == HomeStatus.loading) {
       return const DailyGoalShimmer();
@@ -236,7 +236,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return DailyGoalCard(goal: dashboard.dailyGoal);
   }
 
-  // ─── Continue Learning Section ─────────────────────────────────────────────
+  // Continue Learning Section 
   Widget _buildContinueLearningSection(HomeDashboardModel? dashboard) {
     if (dashboard?.continueLearning == null) {
       return const SizedBox.shrink();
@@ -254,7 +254,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ─── Stats Row Builder ─────────────────────────────────────────────────────
+  // Stats Row Builder
   Widget _buildStatsRow(HomeState state) {
     if (state.status == HomeStatus.loading) {
       return Row(
@@ -309,7 +309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ─── Today's Lessons Section ───────────────────────────────────────────────
+  // Today's Lessons Section 
   Widget _buildTodayLessonsSection(HomeState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +400,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ─── Leaderboard Section ───────────────────────────────────────────────────
+  // Leaderboard Section 
   Widget _buildLeaderboardSection(HomeState state) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -458,7 +458,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ─── Error Card ────────────────────────────────────────────────────────────
+  // Error Card
   Widget _buildErrorCard(
       {required String message, required VoidCallback onRetry}) {
     return Container(

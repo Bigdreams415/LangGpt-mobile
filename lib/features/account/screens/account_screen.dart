@@ -16,7 +16,7 @@ class AccountScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
 
-              // ── Profile Card ───────────────────────────────────────────────
+              // Profile Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -57,13 +57,13 @@ class AccountScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // ── Language progress ─────────────────────────────────────────
+              // Language progress
               const _SectionHeader('My language'),
               const SizedBox(height: 12),
               _LanguageProgressCard(),
               const SizedBox(height: 24),
 
-              // ── Settings ──────────────────────────────────────────────────
+              // Settings
               const _SectionHeader('Settings'),
               const SizedBox(height: 12),
               _SettingsGroup(items: [
