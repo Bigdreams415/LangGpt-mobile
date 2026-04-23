@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -71,6 +72,16 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
     }
   }
 
+  void _handleAppleSignIn() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Apple Sign In coming soon.'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   void _handleNext() {
     if (!_formKey.currentState!.validate()) return;
     final data = SignupData(
@@ -116,8 +127,30 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Google Button ─────────────────────────────────────────────
-              _GoogleSignInButton(onTap: _handleGoogleSignIn),
+              // ── Social Buttons ─────────────────────────────────────────────
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildSocialButton(
+                      onTap: _handleGoogleSignIn,
+                      label: 'Google',
+                      iconPath: 'assets/images/google-icon.svg',
+                      fallbackIcon: Icons.g_mobiledata_rounded,
+                      isApple: false,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildSocialButton(
+                      onTap: _handleAppleSignIn,
+                      label: 'Apple',
+                      iconPath: 'assets/images/apple-logo.svg',
+                      fallbackIcon: Icons.apple_rounded,
+                      isApple: true,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
               _OrDivider(),
               const SizedBox(height: 24),
@@ -223,6 +256,75 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
       ),
     );
   }
+
+  Widget _buildSocialButton({
+    required VoidCallback onTap,
+    required String label,
+    required String iconPath,
+    required IconData fallbackIcon,
+    bool isApple = false,
+  }) {
+    final bgColor = isApple ? const Color(0xFF1E1E1E) : AppColors.surface;
+    final textColor = isApple ? Colors.white : AppColors.textPrimary;
+    final iconColorFilter =
+        isApple ? const ColorFilter.mode(Colors.white, BlendMode.srcIn) : null;
+
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: isApple
+            ? null
+            : Border.all(color: AppColors.divider.withOpacity(0.5), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  iconPath,
+                  height: 22,
+                  width: 22,
+                  colorFilter: iconColorFilter,
+                  placeholderBuilder: (context) => Icon(
+                    fallbackIcon,
+                    size: 22,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ── Supporting Widgets ───────────────────────────────────────────────────────
@@ -282,62 +384,6 @@ class _BackButton extends StatelessWidget {
           Icons.arrow_back_ios_new_rounded,
           size: 16,
           color: AppColors.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
-class _GoogleSignInButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _GoogleSignInButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider, width: 1.5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Text(
-                  'G',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF4285F4),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              AppStrings.continueWithGoogle,
-              style: AppTextStyles.buttonLarge.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
         ),
       ),
     );
