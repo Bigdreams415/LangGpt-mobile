@@ -4,7 +4,7 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  // ── Display ─────────────────────────────────────────────────────────────────
+  // Display 
   static const TextStyle displayLarge = TextStyle(
     fontFamily: 'Sora',
     fontSize: 40,
@@ -32,7 +32,7 @@ class AppTextStyles {
     letterSpacing: -0.3,
   );
 
-  // ── Headline ─────────────────────────────────────────────────────────────────
+  // Headline
   static const TextStyle headlineLarge = TextStyle(
     fontFamily: 'Sora',
     fontSize: 22,
@@ -57,7 +57,7 @@ class AppTextStyles {
     height: 1.4,
   );
 
-  // ── Body ─────────────────────────────────────────────────────────────────────
+  // Body 
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: 'Sora',
     fontSize: 16,
@@ -82,7 +82,7 @@ class AppTextStyles {
     height: 1.5,
   );
 
-  // ── Label ─────────────────────────────────────────────────────────────────
+  // Label
   static const TextStyle labelLarge = TextStyle(
     fontFamily: 'Sora',
     fontSize: 14,
@@ -107,7 +107,7 @@ class AppTextStyles {
     letterSpacing: 0.8,
   );
 
-  // ── Button ─────────────────────────────────────────────────────────────────
+  // Button
   static const TextStyle buttonLarge = TextStyle(
     fontFamily: 'Sora',
     fontSize: 16,

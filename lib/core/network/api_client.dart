@@ -36,7 +36,7 @@ class ApiClient {
   }
 }
 
-// ── Auth interceptor — injects token + handles 401 refresh ───────────────────
+// Auth interceptor — injects token + handles 401 refresh 
 
 class _AuthInterceptor extends Interceptor {
   final SecureStorageService _storage;

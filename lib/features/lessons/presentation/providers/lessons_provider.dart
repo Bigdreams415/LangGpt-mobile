@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/lesson_model.dart';
 import '../../data/repositories/lessons_repository_impl.dart';
 
-// ─── Lessons List State ─────────────────────────────────────────────────────
+// Lessons List State
 
 enum LessonsListStatus { initial, loading, loaded, error }
 
@@ -35,7 +35,7 @@ class LessonsListState {
   }
 }
 
-// ─── Lesson Detail State ────────────────────────────────────────────────────
+// Lesson Detail State
 
 enum LessonDetailStatus { initial, loading, loaded, error }
 
@@ -68,7 +68,7 @@ class LessonDetailState {
   }
 }
 
-// ─── Lesson Response State ──────────────────────────────────────────────────
+// Lesson Response State
 
 enum LessonResponseStatus { initial, loading, loaded, error }
 
@@ -101,7 +101,7 @@ class LessonResponseState {
   }
 }
 
-// ─── Lessons Notifier ───────────────────────────────────────────────────────
+// Lessons Notifier
 
 class LessonsNotifier extends StateNotifier<LessonsListState> {
   LessonsNotifier() : super(const LessonsListState.initial());
@@ -159,7 +159,7 @@ class LessonsNotifier extends StateNotifier<LessonsListState> {
   }
 }
 
-// ─── Lesson Detail Notifier ─────────────────────────────────────────────────
+// Lesson Detail Notifier
 
 class LessonDetailNotifier extends StateNotifier<LessonDetailState> {
   LessonDetailNotifier() : super(const LessonDetailState.initial());
@@ -197,7 +197,7 @@ class LessonDetailNotifier extends StateNotifier<LessonDetailState> {
   }
 }
 
-// ─── Lesson Response Notifier ───────────────────────────────────────────────
+// Lesson Response Notifier 
 
 class LessonResponseNotifier extends StateNotifier<LessonResponseState> {
   LessonResponseNotifier() : super(const LessonResponseState.initial());
@@ -243,7 +243,7 @@ class LessonResponseNotifier extends StateNotifier<LessonResponseState> {
   }
 }
 
-// ─── Providers ──────────────────────────────────────────────────────────────
+// Providers 
 
 final lessonsListProvider =
     StateNotifierProvider<LessonsNotifier, LessonsListState>((ref) {

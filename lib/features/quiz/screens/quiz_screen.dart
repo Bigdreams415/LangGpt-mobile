@@ -752,9 +752,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             Navigator.pop(context); // Close dialog
             // If they failed a real quiz, go back. If practice, they can just exit too.
             if (!passed && !widget.isPractice) {
-              Navigator.pop(context); // Go back
+              Navigator.pop(context);  
             } else if (widget.isPractice) {
-              Navigator.pop(context); // Go back
+              Navigator.pop(context); 
             }
           },
         ),
