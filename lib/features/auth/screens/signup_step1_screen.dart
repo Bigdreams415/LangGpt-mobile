@@ -104,7 +104,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
             children: [
               const SizedBox(height: 16),
 
-              // ── Top bar ──────────────────────────────────────────────────
+              // Top bar 
               Row(
                 children: [
                   _BackButton(onTap: () => Navigator.pop(context)),
@@ -115,7 +115,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Header ───────────────────────────────────────────────────
+              // Header 
               const Text(
                 'Create your\naccount',
                 style: AppTextStyles.displaySmall,
@@ -127,7 +127,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Social Buttons ─────────────────────────────────────────────
+              // Social Buttons 
               Row(
                 children: [
                   Expanded(
@@ -155,7 +155,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               _OrDivider(),
               const SizedBox(height: 24),
 
-              // ── Form ──────────────────────────────────────────────────────
+              // Form 
               Form(
                 key: _formKey,
                 child: Column(
@@ -218,7 +218,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               ),
               const SizedBox(height: 32),
 
-              // ── Next Button ───────────────────────────────────────────────
+              // Next Button
               AppButton(
                 label: 'Continue',
                 onPressed: _handleNext,
@@ -227,7 +227,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
               ),
               const SizedBox(height: 24),
 
-              // ── Login link ────────────────────────────────────────────────
+              // Login link
               Center(
                 child: RichText(
                   text: TextSpan(
@@ -327,7 +327,7 @@ class _SignupStep1ScreenState extends ConsumerState<SignupStep1Screen> {
   }
 }
 
-// ── Supporting Widgets ───────────────────────────────────────────────────────
+// Supporting Widgets 
 
 class _StepIndicator extends StatelessWidget {
   final int currentStep;

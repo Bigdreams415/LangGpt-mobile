@@ -36,7 +36,6 @@ class HomeState {
 }
 
 // Home Notifier
-
 class HomeNotifier extends StateNotifier<HomeState> {
   HomeNotifier() : super(const HomeState.initial());
 
@@ -82,7 +81,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
   }
 }
 
-// ─── Providers ────────────────────────────────────────────────────────────────
+// Providers 
 
 final homeProvider = StateNotifierProvider<HomeNotifier, HomeState>((ref) {
   return HomeNotifier();

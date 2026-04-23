@@ -103,7 +103,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const SizedBox(height: 16),
 
-              // ── Back + Logo Row ──────────────────────────────────────────
               Row(
                 children: [
                   _BackButton(onTap: () => Navigator.pop(context)),
@@ -133,7 +132,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // ── Header ───────────────────────────────────────────────────
+              // Header
               const Text(
                 AppStrings.welcomeBack,
                 style: AppTextStyles.displaySmall,
@@ -145,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Social Buttons ─────────────────────────────────────────────
+              // Social Buttons
               Row(
                 children: [
                   Expanded(
@@ -171,11 +170,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // ── Divider ───────────────────────────────────────────────────
+              // Divider 
               _OrDivider(),
               const SizedBox(height: 24),
 
-              // ── Form ──────────────────────────────────────────────────────
+              // Form 
               Form(
                 key: _formKey,
                 child: Column(
@@ -218,7 +217,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ── Forgot Password ───────────────────────────────────────────
+              // Forgot Password 
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -240,7 +239,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 28),
 
-              // ── Login Button ──────────────────────────────────────────────
+              // Login Button
               AppButton(
                 label: AppStrings.login,
                 onPressed: _handleLogin,
@@ -248,7 +247,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // ── Sign up link ──────────────────────────────────────────────
+              // Sign up link
               Center(
                 child: RichText(
                   text: TextSpan(
@@ -350,7 +349,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-// ── Supporting Widgets ───────────────────────────────────────────────────────
+// Supporting Widgets
 
 class _BackButton extends StatelessWidget {
   final VoidCallback onTap;

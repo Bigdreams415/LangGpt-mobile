@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
         '916229269228-98gae4ve5t23e9fglq2eqf8de4ek02um.apps.googleusercontent.com',
   );
 
-  // ── Signup ────────────────────────────────────────────────────────────────
+  // Signup 
   @override
   Future<AuthResponseModel> signup({
     required String fullName,
@@ -45,7 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return response;
   }
 
-  // ── Login ─────────────────────────────────────────────────────────────────
+  // Login
   @override
   Future<AuthResponseModel> login({
     required String identifier,
@@ -59,7 +59,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return response;
   }
 
-  // ── Google Sign-In ────────────────────────────────────────────────────────
+  // Google Sign-In 
   @override
   Future<AuthResponseModel> googleSignIn({
     String? selectedLanguage,
@@ -92,13 +92,12 @@ class AuthRepositoryImpl implements AuthRepository {
     return response;
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  // Logout
   @override
   Future<void> logout() async {
     try {
-      await _remote.logout(); // Tell backend to invalidate token
+      await _remote.logout();
     } catch (_) {
-      // Even if backend call fails, clear local data
     }
     try {
       await _googleSignIn.signOut(); // Clear Google session
@@ -106,7 +105,7 @@ class AuthRepositoryImpl implements AuthRepository {
     await _storage.clearAll();
   }
 
-  // ── Stored user ───────────────────────────────────────────────────────────
+  // Stored user
   @override
   Future<UserModel?> getStoredUser() async {
     final json = await _storage.getUserJson();
@@ -121,7 +120,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> isLoggedIn() => _storage.isLoggedIn();
 
-  // ── Helper ────────────────────────────────────────────────────────────────
+  // Helper
   Future<void> _persistAuthData(AuthResponseModel response) async {
     await Future.wait([
       _storage.saveAccessToken(response.tokens.accessToken),

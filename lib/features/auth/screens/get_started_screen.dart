@@ -59,21 +59,21 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // ── Background ────────────────────────────────────────────────────
+          // Background 
           Container(
             decoration: const BoxDecoration(
               gradient: AppColors.heroGradient,
             ),
           ),
 
-          // ── Geometric Pattern Overlay ──────────────────────────────────────
+          // Geometric Pattern Overlay
           Positioned.fill(
             child: CustomPaint(
               painter: _GeometricPatternPainter(),
             ),
           ),
 
-          // ── Language Badges (floating) ─────────────────────────────────────
+          // Language Badges (floating) 
           const Positioned(
             top: 100,
             right: -20,
@@ -105,7 +105,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
             ),
           ),
 
-          // ── Main Content ───────────────────────────────────────────────────
+          // Main Content 
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +232,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
   }
 }
 
-// ── Supporting Widgets ───────────────────────────────────────────────────────
+// Supporting Widgets 
 
 class _LanguagePill extends StatelessWidget {
   final String label;
@@ -348,7 +348,7 @@ class _FloatingBadge extends StatelessWidget {
   }
 }
 
-// ── Geometric pattern painter ────────────────────────────────────────────────
+// Geometric pattern painter 
 
 class _GeometricPatternPainter extends CustomPainter {
   @override
@@ -362,7 +362,7 @@ class _GeometricPatternPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
-    // Draw repeating diamond/rhombus shapes (Adinkra-inspired)
+    // Draw repeating diamond/rhombus shapes 
     const spacing = 60.0;
     for (double x = 0; x < size.width + spacing; x += spacing) {
       for (double y = 0; y < size.height + spacing; y += spacing) {

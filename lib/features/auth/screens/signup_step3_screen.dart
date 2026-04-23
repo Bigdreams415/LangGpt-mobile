@@ -99,7 +99,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
     data.selectedLanguage = _selectedLanguage;
     data.selectedLevel = _selectedLevel;
 
-    // ── REAL API CALL ──────────────────────────────────────────────────────
+    // REAL API CALL 
     await ref.read(authProvider.notifier).signup(
           fullName: data.fullName,
           username: data.username,
@@ -141,7 +141,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
             children: [
               const SizedBox(height: 16),
 
-              // ── Top bar ──────────────────────────────────────────────────
+              // Top bar 
               Row(
                 children: [
                   _BackButton(onTap: () => Navigator.pop(context)),
@@ -152,7 +152,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Header ───────────────────────────────────────────────────
+              // Header 
               const Text('Your learning\npath', style: AppTextStyles.displaySmall),
               const SizedBox(height: 8),
               const Text(
@@ -161,7 +161,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
               ),
               const SizedBox(height: 32),
 
-              // ── Language Selection ─────────────────────────────────────────
+              // Language Selection 
               const Text('Which language do you want to learn?',
                   style: AppTextStyles.headlineSmall),
               const SizedBox(height: 14),
@@ -260,7 +260,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
 
               const SizedBox(height: 28),
 
-              // ── Level Selection ───────────────────────────────────────────
+              // Level Selection
               const Text("What's your current level?",
                   style: AppTextStyles.headlineSmall),
               const SizedBox(height: 14),
@@ -343,7 +343,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
   }
 }
 
-// ── Data classes ─────────────────────────────────────────────────────────────
+// Data classes
 
 class _LanguageOption {
   final String code;
@@ -377,7 +377,7 @@ class _LevelOption {
   });
 }
 
-// ── Shared widgets ───────────────────────────────────────────────────────────
+// Shared widgets
 
 class _BackButton extends StatelessWidget {
   final VoidCallback onTap;

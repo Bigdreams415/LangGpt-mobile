@@ -80,7 +80,7 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
             children: [
               const SizedBox(height: 16),
 
-              // ── Top bar ──────────────────────────────────────────────────
+              // Top bar 
               Row(
                 children: [
                   _BackButton(onTap: () => Navigator.pop(context)),
@@ -90,7 +90,7 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Header ───────────────────────────────────────────────────
+              // Header
               const Text('Secure your\naccount', style: AppTextStyles.displaySmall),
               const SizedBox(height: 8),
               const Text(
@@ -99,7 +99,7 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
               ),
               const SizedBox(height: 36),
 
-              // ── Form ──────────────────────────────────────────────────────
+              // Form
               Form(
                 key: _formKey,
                 child: Column(
@@ -202,7 +202,7 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
   }
 }
 
-// ── Password Strength Widget ─────────────────────────────────────────────────
+// Password Strength Widget 
 
 class _PasswordStrengthIndicator extends StatelessWidget {
   final String password;

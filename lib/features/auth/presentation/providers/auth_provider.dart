@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 
-// ── Auth State ────────────────────────────────────────────────────────────────
+// Auth State 
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -41,7 +41,7 @@ class AuthState {
   }
 }
 
-// ── Auth Notifier ─────────────────────────────────────────────────────────────
+// Auth Notifier 
 
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState.initial()) {
@@ -65,7 +65,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  // ── Login ─────────────────────────────────────────────────────────────────
+  // Login
   Future<void> login({
     required String identifier,
     required String password,
@@ -94,7 +94,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  // ── Signup ────────────────────────────────────────────────────────────────
+  // Signup
   Future<void> signup({
     required String fullName,
     required String username,
@@ -135,7 +135,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  // ── Google Sign-In ────────────────────────────────────────────────────────
+  // Google Sign-In
   Future<void> googleSignIn({String? selectedLanguage}) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
@@ -165,13 +165,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  // Logout
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
-  // ── Parse Dio errors into human-readable messages ─────────────────────────
+  // Parse Dio errors into human-readable messages
   String _parseDioError(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
@@ -198,7 +198,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-// ── Provider ──────────────────────────────────────────────────────────────────
+// Provider
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier();
