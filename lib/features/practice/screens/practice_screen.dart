@@ -9,6 +9,7 @@ import '../../progress/data/datasources/progress_remote_datasource.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../presentation/providers/conversation_provider.dart';
 import 'conversation_screen.dart';
+import 'translation_screen.dart';
 
 class PracticeScreen extends ConsumerStatefulWidget {
   const PracticeScreen({super.key});
@@ -118,6 +119,13 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     }
   }
 
+  void _startTranslation() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TranslationScreen()),
+    );
+  }
+
   void _startConversation() {
     final state = ref.read(homeProvider);
     final continueLearning = state.dashboard?.continueLearning;
@@ -185,13 +193,14 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
                 onTap: _startConversation,
               ),
               const SizedBox(height: 12),
-              const _PracticeModeCard(
+              _PracticeModeCard(
                 emoji: '🔤',
                 title: 'Translation',
                 subtitle: 'Translate phrases',
                 color: AppColors.accentBlueSurface,
                 accentColor: AppColors.accentBlue,
                 tag: null,
+                onTap: _startTranslation,
               ),
               const SizedBox(height: 12),
               const _PracticeModeCard(

@@ -35,6 +35,9 @@ class ApiConstants {
   // Conversation
   static const String conversation = '$apiPrefix/conversation/';
 
+  // Translation
+  static const String translate = '$apiPrefix/lessons/translate';
+
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }
