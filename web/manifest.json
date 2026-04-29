@@ -1,6 +1,6 @@
 {
-    "name": "lang_gpt",
-    "short_name": "lang_gpt",
+    "name": "KinSpeak",
+    "short_name": "KinSpeak",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

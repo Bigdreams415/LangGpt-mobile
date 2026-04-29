@@ -1,4 +1,4 @@
-# langGpt — Flutter Frontend
+# KinSpeak — Flutter Frontend
 
 A production-quality Duolingo-style Flutter app for learning Igbo, Yoruba, and Hausa.
 
@@ -99,4 +99,4 @@ GetStarted → Login → MainNavigation
 - [ ] User progress persistence
 - [ ] Actual quiz/lesson/conversation screens
 - [ ] Push notifications (daily reminders)
-- [ ] Offline mode# LangGpt-mobile
+- [ ] Offline mode

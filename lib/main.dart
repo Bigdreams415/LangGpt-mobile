@@ -35,20 +35,20 @@ void main() {
 
   runApp(
     const ProviderScope(
-      child: LangGptApp(),
+      child: KinSpeakApp(),
     ),
   );
 }
 
-class LangGptApp extends ConsumerWidget {
-  const LangGptApp({super.key});
+class KinSpeakApp extends ConsumerWidget {
+  const KinSpeakApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
 
     return MaterialApp(
-      title: 'LangGPT',
+      title: 'KinSpeak',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
