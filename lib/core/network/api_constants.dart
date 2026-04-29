@@ -32,6 +32,9 @@ class ApiConstants {
   static const String updateProgress = '$apiPrefix/progress/update';
   static const String getProgress = '$apiPrefix/progress';
 
+  // Conversation
+  static const String conversation = '$apiPrefix/conversation/';
+
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }

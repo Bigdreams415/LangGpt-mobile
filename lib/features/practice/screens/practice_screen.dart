@@ -7,6 +7,8 @@ import '../../home/presentation/providers/home_provider.dart';
 import '../../lessons/data/repositories/lessons_repository_impl.dart';
 import '../../progress/data/datasources/progress_remote_datasource.dart';
 import '../../quiz/screens/quiz_screen.dart';
+import '../presentation/providers/conversation_provider.dart';
+import 'conversation_screen.dart';
 
 class PracticeScreen extends ConsumerStatefulWidget {
   const PracticeScreen({super.key});
@@ -116,6 +118,36 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     }
   }
 
+  void _startConversation() {
+    final state = ref.read(homeProvider);
+    final continueLearning = state.dashboard?.continueLearning;
+
+    if (continueLearning == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please start a lesson first before practicing conversation.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final ctx = ConversationContext(
+      language: continueLearning.language,
+      level: continueLearning.level,
+      unit: continueLearning.topic,
+      subtopicIndex: 0,
+      unitTitle: continueLearning.title,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(context: ctx),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,13 +175,14 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
                 onTap: _startQuickQuiz,
               ),
               const SizedBox(height: 12),
-              const _PracticeModeCard(
+              _PracticeModeCard(
                 emoji: '💬',
                 title: 'Conversation',
                 subtitle: 'Chat with AI tutor',
                 color: AppColors.secondarySurface,
                 accentColor: AppColors.secondary,
                 tag: 'New',
+                onTap: _startConversation,
               ),
               const SizedBox(height: 12),
               const _PracticeModeCard(
