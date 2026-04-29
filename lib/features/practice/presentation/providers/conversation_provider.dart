@@ -99,6 +99,10 @@ class ConversationNotifier extends StateNotifier<ConversationState> {
       timestamp: DateTime.now(),
     );
 
+    // Build history BEFORE adding the new user message — the new message
+    // is sent as user_message and will be added to history on the next turn.
+    final history = state.conversationHistory;
+
     state = state.copyWith(
       messages: [...state.messages, userMessage],
       isLoading: true,
@@ -113,7 +117,7 @@ class ConversationNotifier extends StateNotifier<ConversationState> {
         subtopicIndex: ctx.subtopicIndex,
         subtopicName: ctx.subtopicName,
         userMessage: text.trim(),
-        conversationHistory: state.conversationHistory,
+        conversationHistory: history,
       );
 
       final response = await _repo.sendMessage(request);

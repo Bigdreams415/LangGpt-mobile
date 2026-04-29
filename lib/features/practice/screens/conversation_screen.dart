@@ -17,12 +17,11 @@ class ConversationScreen extends ConsumerStatefulWidget {
 
 class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   final _scrollController = ScrollController();
-  final _textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.microtask(() {
       ref.read(conversationProvider.notifier).initContext(widget.context);
     });
   }
@@ -30,7 +29,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _textController.dispose();
     super.dispose();
   }
 
@@ -136,13 +134,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   ),
           ),
           // Input bar
-          ChatInputBar(onSend: () {
-            final text = _textController.text;
-            if (text.trim().isNotEmpty) {
-              _handleSend(text);
-              _textController.clear();
-            }
-          }, isLoading: state.isLoading),
+          ChatInputBar(
+            onSend: (text) => _handleSend(text),
+            isLoading: state.isLoading,
+          ),
         ],
       ),
     );

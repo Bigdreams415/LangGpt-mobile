@@ -3,7 +3,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 
 class ChatInputBar extends StatefulWidget {
-  final VoidCallback? onSend;
+  final ValueChanged<String>? onSend;
   final bool isLoading;
   const ChatInputBar({super.key, this.onSend, this.isLoading = false});
 
@@ -13,16 +13,31 @@ class ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<ChatInputBar> {
   final _controller = TextEditingController();
-  bool get _hasText => _controller.text.trim().isNotEmpty;
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    final hasText = _controller.text.trim().isNotEmpty;
+    if (hasText != _hasText) {
+      setState(() => _hasText = hasText);
+    }
+  }
 
   void _handleSend() {
-    if (!_hasText || widget.isLoading) return;
-    widget.onSend?.call();
+    final text = _controller.text.trim();
+    if (text.isEmpty || widget.isLoading) return;
+    widget.onSend?.call(text);
     _controller.clear();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -30,6 +45,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final canSend = _hasText && !widget.isLoading;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
@@ -82,49 +98,40 @@ class _ChatInputBarState extends State<ChatInputBar> {
               ),
             ),
             const SizedBox(width: 10),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _hasText && !widget.isLoading ? _handleSend : null,
+            GestureDetector(
+              onTap: canSend ? _handleSend : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: canSend ? AppColors.primaryGradient : null,
+                  color: canSend
+                      ? null
+                      : isDark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.surfaceVariant,
                   borderRadius: BorderRadius.circular(24),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      gradient: _hasText && !widget.isLoading
-                          ? AppColors.primaryGradient
-                          : null,
-                      color: _hasText && !widget.isLoading
-                          ? null
-                          : isDark
-                              ? AppColors.darkSurfaceVariant
-                              : AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Center(
-                      child: widget.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: AppColors.primary,
-                              ),
-                            )
-                          : Icon(
-                              Icons.send_rounded,
-                              size: 20,
-                              color: _hasText
-                                  ? Colors.white
-                                  : isDark
-                                      ? AppColors.textHintDark
-                                      : AppColors.textHint,
-                            ),
-                    ),
-                  ),
+                ),
+                child: Center(
+                  child: widget.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : Icon(
+                          Icons.send_rounded,
+                          size: 20,
+                          color: canSend
+                              ? Colors.white
+                              : isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHint,
+                        ),
                 ),
               ),
             ),
