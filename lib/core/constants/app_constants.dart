@@ -61,6 +61,12 @@ class AppRoutes {
   static const String home = '/home';
   static const String allLessons = '/all-lessons';
   static const String lessonDetail = '/lesson-detail';
+  static const String languageSelect = '/language-select';
+  static const String deleteAccount = '/delete-account';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String aboutNaijaLingo = '/about-naija-lingo';
+  static const String helpSupport = '/help-support';
+  static const String notifications = '/notifications';
 }
 
 class AppDimensions {

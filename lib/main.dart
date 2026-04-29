@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/network/api_client.dart';
 import 'features/auth/screens/get_started_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -11,6 +12,8 @@ import 'features/auth/screens/signup_step2_screen.dart';
 import 'features/auth/screens/signup_step3_screen.dart';
 import 'features/lessons/screens/all_lessons_screen.dart';
 import 'features/lessons/screens/lesson_detail_screen.dart';
+import 'features/account/screens/language_screen.dart';
+import 'features/account/screens/delete_account_screen.dart';
 import 'navigation/main_navigation.dart';
 
 void main() {
@@ -37,15 +40,19 @@ void main() {
   );
 }
 
-class LangGptApp extends StatelessWidget {
+class LangGptApp extends ConsumerWidget {
   const LangGptApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'LangGPT',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeState.flutterThemeMode,
       initialRoute: AppRoutes.getStarted,
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -73,6 +80,10 @@ class LangGptApp extends StatelessWidget {
               ),
               settings,
             );
+          case AppRoutes.languageSelect:
+            return _slideRoute(const LanguageScreen(), settings);
+          case AppRoutes.deleteAccount:
+            return _slideRoute(const DeleteAccountScreen(), settings);
           default:
             return _fadeRoute(const GetStartedScreen(), settings);
         }

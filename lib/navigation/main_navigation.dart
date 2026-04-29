@@ -58,6 +58,15 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   Widget _buildBottomNav() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final dividerColor = isDark ? AppColors.darkDivider : AppColors.divider;
+    final selectedColor = isDark ? AppColors.primaryLight : AppColors.primary;
+    final unselectedColor = isDark ? AppColors.textHintDark : AppColors.textHint;
+    final indicatorColor = isDark
+        ? AppColors.textHintDark.withValues(alpha: 0.15)
+        : AppColors.textHint.withValues(alpha: 0.2);
+
     return Container(
       decoration: const BoxDecoration(color: Colors.transparent),
       child: SafeArea(
@@ -66,17 +75,19 @@ class _MainNavigationState extends State<MainNavigation> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.94),
+              color: surfaceColor.withValues(alpha: 0.94),
               borderRadius: BorderRadius.circular(26),
               border: Border.all(
-                color: AppColors.divider.withOpacity(0.65),
+                color: dividerColor.withValues(alpha: 0.65),
                 width: 1,
               ),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x1A1F6B40),
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : const Color(0x1A1F6B40),
                   blurRadius: 20,
-                  offset: Offset(0, 8),
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -90,7 +101,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(18),
-                      splashColor: AppColors.primary.withOpacity(0.08),
+                      splashColor: AppColors.primary.withValues(alpha: 0.08),
                       highlightColor: Colors.transparent,
                       onTap: () => setState(() => _currentIndex = index),
                       child: Padding(
@@ -113,8 +124,8 @@ class _MainNavigationState extends State<MainNavigation> {
                                   key: ValueKey('${item.label}_$isSelected'),
                                   size: 24,
                                   color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.textHint,
+                                      ? selectedColor
+                                      : unselectedColor,
                                 ),
                               ),
                             ),
@@ -129,8 +140,8 @@ class _MainNavigationState extends State<MainNavigation> {
                                     ? FontWeight.w700
                                     : FontWeight.w500,
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.textHint,
+                                    ? selectedColor
+                                    : unselectedColor,
                               ),
                               child: Text(item.label),
                             ),
@@ -142,8 +153,8 @@ class _MainNavigationState extends State<MainNavigation> {
                               height: 4,
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.textHint.withOpacity(0.2),
+                                    ? selectedColor
+                                    : indicatorColor,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                             ),

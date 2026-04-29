@@ -21,18 +21,29 @@ class AppColors {
   static const Color accentBlueSurface = Color(0xFFE8EEF7);
   static const Color accentYellowSurface = Color(0xFFFFF8E1);
 
-  // Neutral
+  // Neutral — Light
   static const Color background = Color(0xFFFAF8F3);    // Off-white / Cream
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceVariant = Color(0xFFF2EFE8);
   static const Color divider = Color(0xFFE5E0D5);
 
-  // Text
+  // Neutral — Dark
+  static const Color darkBackground = Color(0xFF0F1410);
+  static const Color darkSurface = Color(0xFF1A1F1A);
+  static const Color darkSurfaceVariant = Color(0xFF242924);
+  static const Color darkDivider = Color(0xFF2E332E);
+
+  // Text — Light
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF6B6560);
   static const Color textHint = Color(0xFFABA49B);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color textOnSecondary = Color(0xFFFFFFFF);
+
+  // Text — Dark
+  static const Color textPrimaryDark = Color(0xFFE8E4DD);
+  static const Color textSecondaryDark = Color(0xFFA09B92);
+  static const Color textHintDark = Color(0xFF6B665E);
 
   // Status
   static const Color success = Color(0xFF2E8B57);
