@@ -75,7 +75,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 ),
                 child: TextField(
                   controller: _controller,
-                  enabled: !widget.isLoading,
                   maxLines: null,
                   textInputAction: TextInputAction.newline,
                   textCapitalization: TextCapitalization.sentences,
@@ -114,24 +113,15 @@ class _ChatInputBarState extends State<ChatInputBar> {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Center(
-                  child: widget.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: AppColors.primary,
-                          ),
-                        )
-                      : Icon(
-                          Icons.send_rounded,
-                          size: 20,
-                          color: canSend
-                              ? Colors.white
-                              : isDark
-                                  ? AppColors.textHintDark
-                                  : AppColors.textHint,
-                        ),
+                  child: Icon(
+                    Icons.send_rounded,
+                    size: 20,
+                    color: canSend
+                        ? Colors.white
+                        : isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHint,
+                  ),
                 ),
               ),
             ),

@@ -204,7 +204,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
               _PracticeModeCard(
                 emoji: '❓',
                 title: 'Quick Quiz',
-                subtitle: '5 questions · 3 minutes',
+                subtitle: '8 questions · 3+ mins',
                 color: AppColors.primarySurface,
                 accentColor: AppColors.primary,
                 tag: 'Recommended',

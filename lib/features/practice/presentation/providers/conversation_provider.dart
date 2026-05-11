@@ -79,14 +79,12 @@ class ConversationState {
   final bool isLoading;
   final String? error;
   final ConversationContext? context;
-  final bool hasCachedMessages;
 
   const ConversationState({
     this.messages = const [],
     this.isLoading = false,
     this.error,
     this.context,
-    this.hasCachedMessages = false,
   });
 
   ConversationState copyWith({
@@ -94,14 +92,12 @@ class ConversationState {
     bool? isLoading,
     String? error,
     ConversationContext? context,
-    bool? hasCachedMessages,
   }) {
     return ConversationState(
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       context: context ?? this.context,
-      hasCachedMessages: hasCachedMessages ?? this.hasCachedMessages,
     );
   }
 
@@ -141,10 +137,7 @@ class ConversationNotifier extends StateNotifier<ConversationState> {
 
       if (messages.isNotEmpty) {
         _messageIdCounter = messages.length;
-        state = state.copyWith(
-          messages: messages,
-          hasCachedMessages: true,
-        );
+        state = state.copyWith(messages: messages);
       }
     } catch (_) {
       // Cache read failure is non-fatal — start fresh
