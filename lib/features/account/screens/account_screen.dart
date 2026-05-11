@@ -90,7 +90,7 @@ class AccountScreen extends ConsumerWidget {
                   ),
                   _SettingsItem(
                     icon: Icons.info_outline_rounded,
-                    label: 'About NaijaLingo',
+                    label: 'About KinSpeak',
                     color: AppColors.surfaceVariant,
                     iconColor: AppColors.textSecondary,
                     onTap: () => Navigator.pushNamed(context, AppRoutes.aboutNaijaLingo),

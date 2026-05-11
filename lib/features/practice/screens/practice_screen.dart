@@ -8,6 +8,7 @@ import '../../lessons/data/repositories/lessons_repository_impl.dart';
 import '../../progress/data/datasources/progress_remote_datasource.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../presentation/providers/conversation_provider.dart';
+import '../presentation/providers/practice_activity_provider.dart';
 import 'conversation_screen.dart';
 import 'translation_screen.dart';
 
@@ -21,6 +22,21 @@ class PracticeScreen extends ConsumerStatefulWidget {
 class _PracticeScreenState extends ConsumerState<PracticeScreen> {
   final _lessonsRepo = LessonsRepositoryImpl.instance;
   final _progressDataSource = ProgressRemoteDataSource.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadActivity());
+  }
+
+  void _loadActivity() {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+    ref.read(practiceActivityProvider.notifier).load(
+          userId: user.id,
+          language: user.selectedLanguage ?? 'Igbo',
+        );
+  }
 
   Future<void> _startQuickQuiz() async {
     final state = ref.read(homeProvider);
@@ -65,9 +81,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
         completedForUnit.sort();
         targetSubtopicIndex = completedForUnit.last + 1;
       }
-    } catch (_) {
-      // Fall back to the first subtopic when progress can't be loaded.
-    }
+    } catch (_) {}
 
     try {
       final lessonDetail = await _lessonsRepo.getLessonDetail(
@@ -123,17 +137,18 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const TranslationScreen()),
-    );
+    ).then((_) => _loadActivity());
   }
 
-  void _startConversation() {
+  Future<void> _startConversation() async {
     final state = ref.read(homeProvider);
     final continueLearning = state.dashboard?.continueLearning;
 
     if (continueLearning == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please start a lesson first before practicing conversation.'),
+          content: Text(
+              'Please start a lesson first before practicing conversation.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -148,16 +163,29 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
       unitTitle: continueLearning.title,
     );
 
-    Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => ConversationScreen(context: ctx),
-      ),
+      MaterialPageRoute(builder: (_) => ConversationScreen(context: ctx)),
     );
+
+    if (!mounted) return;
+
+    final convState = ref.read(conversationProvider);
+    final userMsgCount = convState.messages.where((m) => m.isUser).length;
+    if (userMsgCount > 0) {
+      await saveConversationActivity(
+        language: ctx.language,
+        unitTitle: ctx.unitTitle,
+        messageCount: userMsgCount,
+      );
+      _loadActivity();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final activityState = ref.watch(practiceActivityProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -217,26 +245,142 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
                   style: AppTextStyles.headlineMedium),
               const SizedBox(height: 14),
 
-              const _ActivityItem(
-                  emoji: '❓',
-                  title: 'Greetings Quiz',
-                  result: '4/5 correct',
-                  time: '2 hours ago',
-                  color: AppColors.primarySurface),
-              const _ActivityItem(
-                  emoji: '💬',
-                  title: 'Conversation practice',
-                  result: 'Hausa · 10 min',
-                  time: 'Yesterday',
-                  color: AppColors.secondarySurface),
-              const _ActivityItem(
-                  emoji: '🔤',
-                  title: 'Translation drill',
-                  result: '8 phrases done',
-                  time: '2 days ago',
-                  color: AppColors.accentBlueSurface),
+              _buildActivitySection(activityState),
 
               const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivitySection(PracticeActivityState state) {
+    switch (state.status) {
+      case PracticeActivityStatus.initial:
+      case PracticeActivityStatus.loading:
+        return const _ActivityShimmer();
+
+      case PracticeActivityStatus.error:
+      case PracticeActivityStatus.loaded:
+        if (state.activities.isEmpty) {
+          return _buildEmptyActivity();
+        }
+        return Column(
+          children: state.activities
+              .map((a) => _ActivityItem(
+                    emoji: a.emoji,
+                    title: a.title,
+                    result: a.subtitle,
+                    time: a.timeAgo,
+                    color: _colorForType(a.type),
+                  ))
+              .toList(),
+        );
+    }
+  }
+
+  Widget _buildEmptyActivity() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.history_rounded,
+              size: 40, color: AppColors.textHint),
+          const SizedBox(height: 12),
+          const Text(
+            'No activity yet',
+            style: AppTextStyles.headlineSmall,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Complete a quiz, conversation, or translation\nto see your progress here.',
+            style: AppTextStyles.bodySmall
+                .copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _colorForType(ActivityType type) {
+    switch (type) {
+      case ActivityType.quiz:
+        return AppColors.primarySurface;
+      case ActivityType.conversation:
+        return AppColors.secondarySurface;
+      case ActivityType.translation:
+        return AppColors.accentBlueSurface;
+    }
+  }
+}
+
+class _ActivityShimmer extends StatelessWidget {
+  const _ActivityShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        3,
+        (_) => Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 13,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      height: 11,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 11,
+                width: 56,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
             ],
           ),
         ),

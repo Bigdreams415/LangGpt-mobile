@@ -21,8 +21,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(conversationProvider.notifier).initContext(widget.context);
+    Future.microtask(() async {
+      await ref.read(conversationProvider.notifier).initContext(widget.context);
     });
   }
 
@@ -106,33 +106,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    itemCount: state.messages.length +
-                        (state.isLoading ? 1 : 0) +
-                        (state.error != null ? 1 : 0),
+                    itemCount:
+                        state.messages.length + (state.isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
-                      // Error banner
-                      if (state.error != null && index == 0) {
-                        return _ErrorBanner(
-                          message: state.error!,
-                          onDismiss: () =>
-                              ref.read(conversationProvider.notifier).clearError(),
-                        );
-                      }
-
-                      final adjustedIndex =
-                          state.error != null ? index - 1 : index;
-
-                      if (adjustedIndex < state.messages.length) {
+                      if (index < state.messages.length) {
                         return ChatMessageBubble(
-                          message: state.messages[adjustedIndex],
+                          message: state.messages[index],
                         );
                       }
-
                       // Typing indicator
                       return const _TypingIndicator();
                     },
                   ),
           ),
+          // Error banner sits above the input bar
+          if (state.error != null)
+            _ErrorBanner(
+              message: state.error!,
+              onDismiss: () =>
+                  ref.read(conversationProvider.notifier).clearError(),
+              onRetry: () =>
+                  ref.read(conversationProvider.notifier).retryLastMessage(),
+            ),
           // Input bar
           ChatInputBar(
             onSend: (text) => _handleSend(text),
@@ -186,6 +181,26 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     value: ctx.subtopicName!,
                     isDark: isDark),
               const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await ref
+                        .read(conversationProvider.notifier)
+                        .clearCache();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primarySurface,
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Clear chat history'),
+                ),
+              ),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
@@ -513,12 +528,18 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
 class _ErrorBanner extends StatelessWidget {
   final String message;
   final VoidCallback onDismiss;
-  const _ErrorBanner({required this.message, required this.onDismiss});
+  final VoidCallback onRetry;
+
+  const _ErrorBanner({
+    required this.message,
+    required this.onDismiss,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.secondarySurface,
@@ -535,6 +556,21 @@ class _ErrorBanner extends StatelessWidget {
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.secondary,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.secondary,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'Retry',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           GestureDetector(
