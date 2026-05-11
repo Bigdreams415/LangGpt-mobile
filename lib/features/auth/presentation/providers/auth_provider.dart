@@ -165,6 +165,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> switchLanguage(String language) async {
+    try {
+      final updated = await _repo.updateProfile(selectedLanguage: language);
+      state = state.copyWith(user: updated);
+    } catch (_) {}
+  }
+
   // Logout
   Future<void> logout() async {
     await _repo.logout();

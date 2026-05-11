@@ -27,4 +27,6 @@ abstract class AuthRepository {
   Future<UserModel?> getStoredUser();
 
   Future<bool> isLoggedIn();
+
+  Future<UserModel> updateProfile({String? selectedLanguage});
 }

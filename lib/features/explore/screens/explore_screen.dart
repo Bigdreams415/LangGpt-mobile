@@ -24,34 +24,53 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _loadData();
+      _loadAll();
     });
   }
 
-  void _loadData() {
+  String get _registeredLanguage {
+    final user = ref.read(currentUserProvider);
+    return user?.selectedLanguage ?? 'Igbo';
+  }
+
+  void _loadAll() {
     final language = ref.read(exploreSelectedLanguageProvider);
     ref.read(exploreUnitsProvider.notifier).loadUnits(language);
+    _loadRegisteredProgress();
+  }
 
+  void _loadRegisteredProgress() {
     final user = ref.read(currentUserProvider);
-    if (user != null) {
-      ref.read(exploreProgressProvider.notifier).loadProgress(
-            userId: user.id,
-            language: language,
-          );
-    }
+    if (user == null) return;
+    final registered = user.selectedLanguage ?? 'Igbo';
+    ref.read(exploreProgressProvider.notifier).loadProgress(
+          userId: user.id,
+          language: registered,
+        );
   }
 
   void _onLanguageChanged(String language) {
     ref.read(exploreSelectedLanguageProvider.notifier).state = language;
     ref.read(exploreUnitsProvider.notifier).reload(language);
+  }
 
-    final user = ref.read(currentUserProvider);
-    if (user != null) {
-      ref.read(exploreProgressProvider.notifier).loadProgress(
-            userId: user.id,
-            language: language,
-          );
+  // A unit is unlocked only when browsing the registered language.
+  // Logic mirrors home screen: completed units + current unit are open.
+  bool _isUnitUnlocked(String unitId, ExploreProgressState progressState) {
+    final progress = progressState.data;
+    if (progress == null) return true;
+
+    final completed = progress.completedUnits.toSet();
+    if (completed.contains(unitId)) return true;
+    if (progress.currentUnit.isNotEmpty && progress.currentUnit == unitId) {
+      return true;
     }
+    // Also unlock the next recommended unit so the user can start it
+    if (progress.nextRecommendedUnit.isNotEmpty &&
+        progress.nextRecommendedUnit == unitId) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -59,9 +78,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final selectedLanguage = ref.watch(exploreSelectedLanguageProvider);
     final unitsState = ref.watch(exploreUnitsProvider);
     final progressState = ref.watch(exploreProgressProvider);
-
-    final completedUnits =
-        progressState.data?.completedUnits.toSet() ?? <String>{};
+    final registered = _registeredLanguage;
+    final isBrowsingOtherLanguage = selectedLanguage != registered;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -81,13 +99,24 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   ),
                   const SizedBox(height: 20),
                   _buildLanguageTabs(selectedLanguage),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
+
+            // Banner when the user is browsing a different language
+            if (isBrowsingOtherLanguage)
+              _buildOtherLanguageBanner(
+                  selectedLanguage, registered, progressState),
+
             Expanded(
               child: _buildBody(
-                  unitsState, completedUnits, selectedLanguage, progressState),
+                unitsState,
+                progressState,
+                selectedLanguage,
+                registered,
+                isBrowsingOtherLanguage,
+              ),
             ),
           ],
         ),
@@ -96,41 +125,91 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   Widget _buildLanguageTabs(String selected) {
-    return Row(
-      children: _languages.map((lang) {
-        final isSelected = selected == lang;
-        return GestureDetector(
-          onTap: () => _onLanguageChanged(lang),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.only(right: 10),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : AppColors.surface,
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.divider,
-                width: 1.5,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _languages.map((lang) {
+          final isSelected = selected == lang;
+          return GestureDetector(
+            onTap: () => _onLanguageChanged(lang),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(right: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.surface,
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: isSelected ? AppColors.primary : AppColors.divider,
+                  width: 1.5,
+                ),
+              ),
+              child: Text(
+                lang,
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
               ),
             ),
-            child: Text(
-              lang,
-              style: AppTextStyles.labelLarge.copyWith(
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildOtherLanguageBanner(
+    String browsing,
+    String registered,
+    ExploreProgressState progressState,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.accentBlueSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: AppColors.accentBlue.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline_rounded,
+              color: AppColors.accentBlue, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.accentBlue,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'You\'re learning $registered. ',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.accentBlue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                        'Tap "Start" on any $browsing lesson to switch languages.',
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
 
   Widget _buildBody(
     ExploreUnitsState state,
-    Set<String> completedUnits,
-    String language,
     ExploreProgressState progressState,
+    String selectedLanguage,
+    String registeredLanguage,
+    bool isBrowsingOtherLanguage,
   ) {
     switch (state.status) {
       case ExploreUnitsStatus.initial:
@@ -138,25 +217,32 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         return const ExploreGridShimmer();
 
       case ExploreUnitsStatus.error:
-        return _buildError(state.errorMessage, language);
+        return _buildError(state.errorMessage, selectedLanguage);
 
       case ExploreUnitsStatus.loaded:
         final topics = state.data?.topics ?? [];
         if (topics.isEmpty) {
           return const Center(child: Text('No topics available'));
         }
-        return _buildGrid(topics, completedUnits, language, progressState);
+        return _buildGrid(
+          topics,
+          progressState,
+          selectedLanguage,
+          registeredLanguage,
+          isBrowsingOtherLanguage,
+        );
     }
   }
 
   Widget _buildGrid(
     List<LessonUnitModel> topics,
-    Set<String> completedUnits,
-    String language,
     ExploreProgressState progressState,
+    String selectedLanguage,
+    String registeredLanguage,
+    bool isBrowsingOtherLanguage,
   ) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,
@@ -166,27 +252,60 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       itemCount: topics.length,
       itemBuilder: (context, i) {
         final unit = topics[i];
+
+        // Lock logic only applies to the user's registered language
+        final isCompleted = !isBrowsingOtherLanguage &&
+            (progressState.data?.completedUnits.contains(unit.id) ?? false);
+        final isLocked = !isBrowsingOtherLanguage &&
+            !_isUnitUnlocked(unit.id, progressState);
+
         return ExploreUnitCard(
           unit: unit,
-          isCompleted: completedUnits.contains(unit.id),
-          onTap: () => _openUnit(unit, language, progressState),
+          isCompleted: isCompleted,
+          isLocked: isLocked,
+          onTap: () => _onUnitTapped(
+            unit,
+            selectedLanguage,
+            registeredLanguage,
+            isBrowsingOtherLanguage,
+            isLocked,
+            progressState,
+          ),
         );
       },
     );
   }
 
-  void _openUnit(
-      LessonUnitModel unit, String language, ExploreProgressState progressState) {
+  void _onUnitTapped(
+    LessonUnitModel unit,
+    String selectedLanguage,
+    String registeredLanguage,
+    bool isBrowsingOtherLanguage,
+    bool isLocked,
+    ExploreProgressState progressState,
+  ) {
+    if (isLocked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pass the current quiz (80%+) to unlock this topic.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ExploreUnitDetailScreen(
-          language: language,
+          language: selectedLanguage,
           unitId: unit.id,
           title: unit.title,
           emoji: unit.emoji,
           level: unit.level,
           progress: progressState.data,
+          registeredLanguage: registeredLanguage,
+          isForeignLanguage: isBrowsingOtherLanguage,
         ),
       ),
     );

@@ -6,6 +6,7 @@ import '../../lessons/data/models/lesson_model.dart';
 class ExploreUnitCard extends StatelessWidget {
   final LessonUnitModel unit;
   final bool isCompleted;
+  final bool isLocked;
   final VoidCallback onTap;
 
   const ExploreUnitCard({
@@ -13,6 +14,7 @@ class ExploreUnitCard extends StatelessWidget {
     required this.unit,
     required this.onTap,
     this.isCompleted = false,
+    this.isLocked = false,
   });
 
   @override
@@ -21,97 +23,103 @@ class ExploreUnitCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isCompleted
-                ? AppColors.primary.withValues(alpha: 0.4)
-                : AppColors.divider,
+      child: Opacity(
+        opacity: isLocked ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isCompleted
+                  ? AppColors.primary.withValues(alpha: 0.4)
+                  : AppColors.divider,
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: levelStyle.bgColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      unit.emoji,
-                      style: const TextStyle(fontSize: 22),
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                if (isCompleted)
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
                   Container(
-                    width: 22,
-                    height: 22,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: levelStyle.bgColor,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 14,
+                    child: Center(
+                      child: Text(
+                        unit.emoji,
+                        style: const TextStyle(fontSize: 22),
+                      ),
                     ),
                   ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              unit.title,
-              style: AppTextStyles.headlineSmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: levelStyle.badgeColor,
-                    borderRadius: BorderRadius.circular(6),
+                  const Spacer(),
+                  if (isLocked)
+                    const Icon(Icons.lock_rounded,
+                        size: 18, color: AppColors.textHint)
+                  else if (isCompleted)
+                    Container(
+                      width: 22,
+                      height: 22,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                unit.title,
+                style: AppTextStyles.headlineSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: levelStyle.badgeColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _capitalize(unit.level),
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: levelStyle.textColor,
+                        fontSize: 10,
+                      ),
+                    ),
                   ),
-                  child: Text(
-                    _capitalize(unit.level),
+                  const Spacer(),
+                  Text(
+                    '${unit.subtopicCount} lessons',
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: levelStyle.textColor,
+                      color: AppColors.textSecondary,
                       fontSize: 10,
                     ),
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  '${unit.subtopicCount} lessons',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${unit.durationMinutes} min',
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textHint,
-                fontSize: 10,
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                '${unit.durationMinutes} min',
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.textHint,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

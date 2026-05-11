@@ -84,3 +84,10 @@ Routing is **manual** via `MaterialApp.onGenerateRoute` in `lib/main.dart` with 
 - Models use hand-written `fromJson` / `toJson`. Backend uses snake_case (`full_name`, `id_token`, `selected_language`, `date_of_birth`); Dart side uses camelCase — keep the mapping in the model.
 - `print` is used for `[API]` request/response logging via the `LogInterceptor` — that's intentional.
 - `flutter_lints` is enabled with no extra rule overrides; don't disable lints inline unless there's a specific reason.
+
+## Note
+- 1. I hate comment like this // ── Selected language ────────────────────────────────────────────────────────
+instead something like this // Selected language is better
+so please don't make that mistake of writing such comment in my code becayse they screens AI code generated
+a clear and direct comment without _______ not ----------
+so in your code that you are going to send in the future try and avoid this and also if you visit any code that have this or things like this remoove it and rename it properly to have a nice clean comments

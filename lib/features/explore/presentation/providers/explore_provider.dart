@@ -3,11 +3,10 @@ import '../../../lessons/data/models/lesson_model.dart';
 import '../../../progress/data/models/progress_model.dart';
 import '../../data/repositories/explore_repository_impl.dart';
 
-// ── Selected language ────────────────────────────────────────────────────────
-
+// Selected browse language (the tab the user is looking at)
 final exploreSelectedLanguageProvider = StateProvider<String>((ref) => 'Igbo');
 
-// ── Units list ───────────────────────────────────────────────────────────────
+// Units list state
 
 enum ExploreUnitsStatus { initial, loading, loaded, error }
 
@@ -77,7 +76,8 @@ final exploreUnitsProvider =
     StateNotifierProvider<ExploreUnitsNotifier, ExploreUnitsState>(
         (ref) => ExploreUnitsNotifier());
 
-// ── Progress ─────────────────────────────────────────────────────────────────
+// Progress state — always loaded for the user's REGISTERED language,
+// not the currently browsed language. This is the source of truth for lock logic.
 
 enum ExploreProgressStatus { initial, loading, loaded, error }
 
@@ -122,11 +122,11 @@ class ExploreProgressNotifier extends StateNotifier<ExploreProgressState> {
         status: ExploreProgressStatus.loading, errorMessage: null);
 
     try {
-      final data = await _repo.getUserProgress(
-          userId: userId, language: language);
+      final data =
+          await _repo.getUserProgress(userId: userId, language: language);
       if (!mounted) return;
-      state = ExploreProgressState(
-          status: ExploreProgressStatus.loaded, data: data);
+      state =
+          ExploreProgressState(status: ExploreProgressStatus.loaded, data: data);
     } catch (_) {
       // Progress is non-critical — fail silently so the unit list still shows
       if (!mounted) return;
@@ -139,7 +139,7 @@ final exploreProgressProvider =
     StateNotifierProvider<ExploreProgressNotifier, ExploreProgressState>(
         (ref) => ExploreProgressNotifier());
 
-// ── Unit detail ───────────────────────────────────────────────────────────────
+// Unit detail state
 
 enum ExploreUnitDetailStatus { initial, loading, loaded, error }
 
@@ -188,8 +188,8 @@ class ExploreUnitDetailNotifier
       final data =
           await _repo.getUnitDetail(language: language, unitId: unitId);
       if (!mounted) return;
-      state =
-          ExploreUnitDetailState(status: ExploreUnitDetailStatus.loaded, data: data);
+      state = ExploreUnitDetailState(
+          status: ExploreUnitDetailStatus.loaded, data: data);
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(
