@@ -15,30 +15,30 @@ class LessonTopicShimmer extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const ShimmerBox(width: 50, height: 50, borderRadius: 12),
-          const SizedBox(width: 14),
+          ShimmerBox(width: 50, height: 50, borderRadius: 12),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ShimmerBox(width: 120, height: 18, borderRadius: 6),
-                const SizedBox(height: 6),
-                const ShimmerBox(width: 200, height: 14, borderRadius: 4),
-                const SizedBox(height: 8),
+                ShimmerBox(width: 120, height: 18, borderRadius: 6),
+                SizedBox(height: 6),
+                ShimmerBox(width: 200, height: 14, borderRadius: 4),
+                SizedBox(height: 8),
                 Row(
                   children: [
-                    const ShimmerBox(width: 60, height: 20, borderRadius: 10),
-                    const SizedBox(width: 8),
-                    const ShimmerBox(width: 50, height: 14, borderRadius: 4),
+                    ShimmerBox(width: 60, height: 20, borderRadius: 10),
+                    SizedBox(width: 8),
+                    ShimmerBox(width: 50, height: 14, borderRadius: 4),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          const ShimmerBox(width: 18, height: 18, borderRadius: 4),
+          SizedBox(width: 8),
+          ShimmerBox(width: 18, height: 18, borderRadius: 4),
         ],
       ),
     );

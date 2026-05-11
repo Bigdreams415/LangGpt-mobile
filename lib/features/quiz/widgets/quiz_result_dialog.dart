@@ -81,7 +81,7 @@ class _QuizResultDialogState extends State<QuizResultDialog> {
                           ? const LinearGradient(
                               colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
                             )
-                          : LinearGradient(
+                          : const LinearGradient(
                               colors: [
                                 AppColors.primary,
                                 AppColors.primaryDark

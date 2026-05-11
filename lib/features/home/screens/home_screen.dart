@@ -257,13 +257,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Stats Row Builder
   Widget _buildStatsRow(HomeState state) {
     if (state.status == HomeStatus.loading) {
-      return Row(
+      return const Row(
         children: [
-          const Expanded(child: StatCardShimmer()),
-          const SizedBox(width: 12),
-          const Expanded(child: StatCardShimmer()),
-          const SizedBox(width: 12),
-          const Expanded(child: StatCardShimmer()),
+          Expanded(child: StatCardShimmer()),
+          SizedBox(width: 12),
+          Expanded(child: StatCardShimmer()),
+          SizedBox(width: 12),
+          Expanded(child: StatCardShimmer()),
         ],
       );
     }

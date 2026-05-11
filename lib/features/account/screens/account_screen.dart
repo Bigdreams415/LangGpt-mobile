@@ -156,7 +156,7 @@ class AccountScreen extends ConsumerWidget {
                 (route) => false,
               );
             },
-            child: Text(
+            child: const Text(
               'Log out',
               style: TextStyle(color: AppColors.secondary),
             ),
@@ -296,7 +296,7 @@ class _StatsRow extends StatelessWidget {
             iconColor: AppColors.accentYellow,
           ),
           _StatDivider(isDark: isDark),
-          _StatItem(
+          const _StatItem(
             value: '12',
             label: 'Lessons',
             icon: Icons.menu_book_rounded,
@@ -508,7 +508,7 @@ class _LanguageProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(_languageName, style: AppTextStyles.headlineSmall),
-                Text(
+                const Text(
                   'Beginner · 12 lessons done',
                   style: AppTextStyles.bodySmall,
                 ),

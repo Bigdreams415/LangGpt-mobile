@@ -25,7 +25,7 @@ class ChatMessageBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!message.isUser) ...[
-                _Avatar(isUser: false),
+                const _Avatar(isUser: false),
                 const SizedBox(width: 10),
               ],
               Flexible(
@@ -129,7 +129,7 @@ class ChatMessageBubble extends StatelessWidget {
               ),
               if (message.isUser) ...[
                 const SizedBox(width: 10),
-                _Avatar(isUser: true),
+                const _Avatar(isUser: true),
               ],
             ],
           ),

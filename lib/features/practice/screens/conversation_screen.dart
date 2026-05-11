@@ -68,7 +68,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'AI Tutor',
               style: AppTextStyles.headlineSmall,
             ),
@@ -172,7 +172,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Conversation Context',
+              const Text('Conversation Context',
                   style: AppTextStyles.headlineMedium),
               const SizedBox(height: 16),
               _ContextRow(
@@ -276,7 +276,7 @@ class _EmptyChatState extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Chat with your AI Tutor',
                 style: AppTextStyles.headlineMedium,
                 textAlign: TextAlign.center,
@@ -437,13 +437,13 @@ class _TypingIndicator extends StatelessWidget {
                 bottomLeft: Radius.circular(6),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _Dot(delay: 0),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _Dot(delay: 200),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _Dot(delay: 400),
               ],
             ),

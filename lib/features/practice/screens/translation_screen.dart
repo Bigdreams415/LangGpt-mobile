@@ -119,7 +119,7 @@ class _TranslationScreenState extends ConsumerState<TranslationScreen> {
 
                 // History
                 if (state.history.isNotEmpty) ...[
-                  Text(
+                  const Text(
                     'Recent translations',
                     style: AppTextStyles.headlineMedium,
                   ),
@@ -334,7 +334,7 @@ class _LangChip extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Select language', style: AppTextStyles.headlineMedium),
+              const Text('Select language', style: AppTextStyles.headlineMedium),
               const SizedBox(height: 12),
               ...languages.map((lang) {
                 final isSelected = lang == language;

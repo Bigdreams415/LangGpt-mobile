@@ -203,7 +203,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       ),
       title: Column(
         children: [
-          Text(
+          const Text(
             'Quiz Time! 📝',
             style: AppTextStyles.headlineSmall,
           ),
@@ -592,7 +592,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.divider)),
+        border: const Border(top: BorderSide(color: AppColors.divider)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

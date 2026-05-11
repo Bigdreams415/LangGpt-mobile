@@ -38,7 +38,7 @@ class DeleteAccountScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            Text(
+            const Text(
               'Delete your account?',
               style: AppTextStyles.headlineLarge,
               textAlign: TextAlign.center,
@@ -129,7 +129,7 @@ class DeleteAccountScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
+            child: const Text(
               'Cancel',
               style: TextStyle(color: AppColors.textSecondary),
             ),

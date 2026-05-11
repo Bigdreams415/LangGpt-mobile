@@ -159,7 +159,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
           const SizedBox(height: 24),
 
           // Vocabulary Section
-          Text(
+          const Text(
             'Vocabulary',
             style: AppTextStyles.headlineSmall,
           ),
@@ -188,7 +188,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
           const SizedBox(height: 24),
 
           // Phrases Section
-          Text(
+          const Text(
             'Useful Phrases',
             style: AppTextStyles.headlineSmall,
           ),

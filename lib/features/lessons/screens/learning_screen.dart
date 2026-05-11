@@ -310,11 +310,11 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.tips_and_updates_rounded,
+                    Icon(Icons.tips_and_updates_rounded,
                         color: AppColors.accentYellow),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Text(
                       'Pro Tip',
                       style: AppTextStyles.headlineSmall,
@@ -370,7 +370,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
   Widget _buildBottomNavigation(LessonResponseModel lesson) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),

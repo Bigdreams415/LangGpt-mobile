@@ -92,7 +92,7 @@ class LessonTopicCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
+                          const Icon(
                             Icons.timer_outlined,
                             size: 14,
                             color: AppColors.textHint,
@@ -131,7 +131,7 @@ class LessonTopicCard extends StatelessWidget {
                     color: AppColors.textHint,
                   )
                 else
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 18,
                     color: AppColors.textHint,
