@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -13,69 +14,131 @@ class DailyGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percentage = goal.percentage / 100;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final percentage = (goal.percentage / 100).clamp(0.0, 1.0);
+    final isComplete = percentage >= 1.0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(
+          color: isDark ? AppColors.darkDivider : AppColors.divider,
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Daily goal',
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'DAILY GOAL',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                const SizedBox(height: 10),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${goal.completed}',
+                        style: AppTextStyles.displayMedium.copyWith(
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          height: 1.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' / ${goal.target}',
+                        style: AppTextStyles.headlineMedium.copyWith(
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isComplete ? 'Goal reached today 🎉' : 'lessons completed',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: isComplete
+                        ? AppColors.primary
+                        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                    fontWeight: isComplete ? FontWeight.w600 : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 76,
+            height: 76,
+            child: CustomPaint(
+              painter: _RingPainter(
+                progress: percentage,
+                color: AppColors.primary,
+                backgroundColor: isDark ? AppColors.darkDivider : AppColors.divider,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(100),
-                ),
+              child: Center(
                 child: Text(
-                  '${goal.completed}/${goal.target} done',
-                  style: AppTextStyles.labelSmall.copyWith(color: Colors.white),
+                  '${(percentage * 100).toInt()}%',
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _getMotivationalMessage(percentage),
-            style: AppTextStyles.headlineSmall.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: LinearProgressIndicator(
-              value: percentage.clamp(0.0, 1.0),
-              backgroundColor: Colors.white.withOpacity(0.25),
-              color: AppColors.accentYellow,
-              minHeight: 8,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  String _getMotivationalMessage(double percentage) {
-    if (percentage >= 1.0) return 'Amazing! 🎉\nDaily goal completed!';
-    if (percentage >= 0.5) return 'Keep going!\nYou\'re ${(percentage * 100).toInt()}% there today.';
-    return 'Let\'s get started!\nComplete 5 lessons today.';
+class _RingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final Color backgroundColor;
+
+  _RingPainter({
+    required this.progress,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - 8) / 2;
+
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final fgPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      fgPaint,
+    );
   }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

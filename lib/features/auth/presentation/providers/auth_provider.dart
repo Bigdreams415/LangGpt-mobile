@@ -165,6 +165,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> refreshUserStats(int streakCount, int totalXp) async {
+    final current = state.user;
+    if (current == null) return;
+    final updated = current.copyWith(streakCount: streakCount, totalXp: totalXp);
+    await _repo.updateCachedUser(updated);
+    state = state.copyWith(user: updated);
+  }
+
   Future<void> switchLanguage(String language) async {
     try {
       final updated = await _repo.updateProfile(selectedLanguage: language);

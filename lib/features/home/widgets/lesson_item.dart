@@ -15,29 +15,36 @@ class LessonItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isLocked ? AppColors.surfaceVariant : AppColors.surface,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider, width: 1),
+        border: Border.all(
+          color: isDark ? AppColors.darkDivider : AppColors.divider,
+        ),
       ),
       child: Row(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: lesson.isCompleted
-                  ? AppColors.primarySurface
-                  : AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                lesson.emoji,
-                style: const TextStyle(fontSize: 22),
+          Opacity(
+            opacity: isLocked ? 0.5 : 1.0,
+            child: Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.darkSurfaceVariant
+                    : AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  lesson.emoji,
+                  style: const TextStyle(fontSize: 22),
+                ),
               ),
             ),
           ),
@@ -48,8 +55,13 @@ class LessonItem extends StatelessWidget {
               children: [
                 Text(
                   lesson.title,
-                  style: AppTextStyles.headlineSmall,
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    color: isLocked
+                        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)
+                        : null,
+                  ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   lesson.subtitle,
                   style: AppTextStyles.bodySmall,
@@ -57,56 +69,45 @@ class LessonItem extends StatelessWidget {
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (lesson.isCompleted)
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                )
-              else if (isLocked)
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: AppColors.textHint,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.lock_rounded,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    '${lesson.durationMinutes} min',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.primary,
-                    ),
+          const SizedBox(width: 10),
+          if (lesson.isCompleted)
+            Container(
+              width: 26,
+              height: 26,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 14,
+              ),
+            )
+          else if (isLocked)
+            Icon(
+              Icons.lock_outline_rounded,
+              color: isDark ? AppColors.textHintDark : AppColors.textHint,
+              size: 18,
+            )
+          else
+            Row(
+              children: [
+                Text(
+                  '${lesson.durationMinutes} min',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-            ],
-          ),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                ),
+              ],
+            ),
         ],
       ),
     );

@@ -115,7 +115,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
         throw Exception('User not logged in');
       }
 
-      await _progressDataSource.updateProgress(
+      final progressResult = await _progressDataSource.updateProgress(
         userId: user.id,
         language: user.selectedLanguage ?? 'Igbo',
         unit: unit,
@@ -123,6 +123,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
         subtopicName: subtopicName,
         score: score,
         level: level,
+      );
+
+      ref.read(authProvider.notifier).refreshUserStats(
+        progressResult.streakCount,
+        progressResult.totalXp,
       );
 
       final passed = score >= 80;

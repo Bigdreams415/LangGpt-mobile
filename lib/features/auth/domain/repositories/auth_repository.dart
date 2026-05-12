@@ -29,4 +29,6 @@ abstract class AuthRepository {
   Future<bool> isLoggedIn();
 
   Future<UserModel> updateProfile({String? selectedLanguage});
+
+  Future<void> updateCachedUser(UserModel user);
 }

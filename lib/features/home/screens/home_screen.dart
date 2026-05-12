@@ -77,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final homeState = ref.watch(homeProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -93,30 +93,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Top Bar with real user data 
                 _buildTopBar(homeState),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Daily Goal Progress 
                 _buildDailyGoalCard(homeState),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Continue Lesson 
                 if (homeState.status == HomeStatus.loaded)
                   _buildContinueLearningSection(homeState.dashboard),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Stats Row 
                 _buildStatsRow(homeState),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Today's Topics 
                 _buildTodayLessonsSection(homeState),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Leaderboard preview 
                 _buildLeaderboardSection(homeState),
                 const SizedBox(height: 32),
               ],
@@ -127,9 +121,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Top Bar Builder 
+  // Top Bar Builder
   Widget _buildTopBar(HomeState state) {
+    final user = ref.watch(currentUserProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final initials = _initials(user?.fullName ?? '');
+    final language = user?.selectedLanguage;
+
+    String name = 'Learner';
+    if (state.status == HomeStatus.loaded && state.dashboard != null) {
+      name = state.dashboard!.userName;
+    } else if (user?.fullName != null && user!.fullName.isNotEmpty) {
+      name = user.fullName.split(' ').first;
+    }
+
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Column(
@@ -137,85 +144,81 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Text(
                 _getGreeting(),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                 ),
               ),
-              // Show name from real data or placeholder while loading
-              if (state.status == HomeStatus.loaded && state.dashboard != null)
-                Text(
-                  state.dashboard!.userName,
-                  style: AppTextStyles.displaySmall,
-                )
-              else if (state.status == HomeStatus.loading)
-                const ShimmerBox(width: 120, height: 24, borderRadius: 8)
+              const SizedBox(height: 2),
+              if (state.status == HomeStatus.loading)
+                const ShimmerBox(width: 140, height: 28, borderRadius: 8)
               else
-                const Text('Learner', style: AppTextStyles.displaySmall),
+                Text(
+                  name,
+                  style: AppTextStyles.displaySmall.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              if (language != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Learning $language',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
-        // Streak badge with real data
         if (state.status == HomeStatus.loaded && state.dashboard != null)
           StreakBadge(streak: state.dashboard!.streak)
         else if (state.status == HomeStatus.loading)
-          const ShimmerBox(width: 70, height: 40, borderRadius: 12)
+          const ShimmerBox(width: 70, height: 32, borderRadius: 100)
         else
-          const StreakBadge(streak: 0),
+          StreakBadge(streak: user?.streakCount ?? 0),
         const SizedBox(width: 10),
-        // Avatar with user initials
-        _buildAvatar(state),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppColors.darkDivider : AppColors.divider,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              initials,
+              style: AppTextStyles.labelLarge.copyWith(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildAvatar(HomeState state) {
-    String initials = '?';
-    if (state.status == HomeStatus.loaded && state.dashboard != null) {
-      final name = state.dashboard!.userName;
-      initials = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?';
-      // If there's a last name, add it
-      if (name.contains(' ')) {
-        final parts = name.split(' ');
-        initials = parts[0][0].toUpperCase() +
-            (parts.length > 1 ? parts[1][0].toUpperCase() : '');
-      }
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Center(
-        child: state.status == HomeStatus.loading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : Text(
-                initials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-      ),
-    );
+    return parts[0][0].toUpperCase();
   }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Ụtụtụ ọma 👋';
-    if (hour < 17) return 'Ehihie ọma ☀️';
-    return 'Mgbede ọma 🌙';
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   }
 
   // Daily Goal Card Builder 
@@ -247,9 +250,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Continue learning', style: AppTextStyles.headlineMedium),
+        Text(
+          'Continue learning',
+          style: AppTextStyles.headlineMedium.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: 12),
-        ContinueLessonCard(lesson: continueLesson),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.lessonDetail,
+              arguments: {
+                'topicId': continueLesson.topic,
+                'language': continueLesson.language,
+                'title': continueLesson.title,
+              },
+            );
+          },
+          child: ContinueLessonCard(lesson: continueLesson),
+        ),
       ],
     );
   }
@@ -257,14 +278,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Stats Row Builder
   Widget _buildStatsRow(HomeState state) {
     if (state.status == HomeStatus.loading) {
-      return const Row(
-        children: [
-          Expanded(child: StatCardShimmer()),
-          SizedBox(width: 12),
-          Expanded(child: StatCardShimmer()),
-          SizedBox(width: 12),
-          Expanded(child: StatCardShimmer()),
-        ],
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Container(
+        height: 86,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? AppColors.darkDivider : AppColors.divider,
+          ),
+        ),
       );
     }
 
@@ -274,38 +297,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final stats = state.dashboard!.stats;
 
-    return Row(
-      children: [
-        Expanded(
-          child: StatCard(
-            value: stats.lessonsCompleted.toString(),
-            label: 'Lessons\ncompleted',
-            icon: '📚',
-            color: AppColors.primarySurface,
-            textColor: AppColors.primaryDark,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StatCard(
-            value: '${stats.quizAccuracy.toInt()}%',
-            label: 'Quiz\naccuracy',
-            icon: '🎯',
-            color: AppColors.secondarySurface,
-            textColor: AppColors.secondaryDark,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StatCard(
-            value: stats.totalXp.toString(),
-            label: 'XP\nearned',
-            icon: '⚡',
-            color: AppColors.accentYellowSurface,
-            textColor: const Color(0xFFB8860B),
-          ),
-        ),
-      ],
+    return StatsOverviewCard(
+      lessonsValue: stats.lessonsCompleted.toString(),
+      accuracyValue: '${stats.quizAccuracy.toInt()}%',
+      xpValue: stats.totalXp.toString(),
     );
   }
 
@@ -316,16 +311,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("Today's lessons", style: AppTextStyles.headlineMedium),
+            Text(
+              "Today's lessons",
+              style: AppTextStyles.headlineMedium.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.pushNamed(context, AppRoutes.allLessons);
               },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               child: Text(
                 'See all',
-                style:
-                    AppTextStyles.labelLarge.copyWith(color: AppColors.primary),
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -400,39 +408,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Leaderboard Section 
+  // Leaderboard Section
   Widget _buildLeaderboardSection(HomeState state) {
+    final user = ref.watch(currentUserProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider, width: 1),
+        border: Border.all(
+          color: isDark ? AppColors.darkDivider : AppColors.divider,
+          width: 1,
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Top learners this week',
-                  style: AppTextStyles.headlineSmall),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to full leaderboard
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                ),
-                child: Text(
-                  'See all',
-                  style: AppTextStyles.labelLarge
-                      .copyWith(color: AppColors.primary),
-                ),
-              ),
-            ],
+          Text(
+            'Top learners',
+            style: AppTextStyles.headlineSmall.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 2),
+          Text(
+            user?.selectedLanguage != null
+                ? '${user!.selectedLanguage} · ranked by XP'
+                : 'Ranked by XP',
+            style: AppTextStyles.labelSmall.copyWith(
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 16),
           if (state.status == HomeStatus.loading)
             ...List.generate(3, (_) => const LeaderboardShimmer())
           else if (state.status == HomeStatus.error || state.dashboard == null)
@@ -451,7 +461,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             )
           else
             ...state.dashboard!.leaderboard.map(
-              (entry) => LeaderboardEntry(entry: entry),
+              (entry) => LeaderboardEntry(
+                entry: entry,
+                isCurrentUser: user?.fullName != null &&
+                    entry.name == user!.fullName,
+              ),
             ),
         ],
       ),
@@ -464,9 +478,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
+        color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../presentation/providers/auth_provider.dart';
 
-class GetStartedScreen extends StatefulWidget {
+class GetStartedScreen extends ConsumerStatefulWidget {
   const GetStartedScreen({super.key});
 
   @override
-  State<GetStartedScreen> createState() => _GetStartedScreenState();
+  ConsumerState<GetStartedScreen> createState() => _GetStartedScreenState();
 }
 
-class _GetStartedScreenState extends State<GetStartedScreen>
+class _GetStartedScreenState extends ConsumerState<GetStartedScreen>
     with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _slideController;
@@ -21,6 +23,17 @@ class _GetStartedScreenState extends State<GetStartedScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.listenManual<AuthState>(authProvider, (prev, curr) {
+        if (curr.status == AuthStatus.authenticated) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.main,
+            (route) => false,
+          );
+        }
+      });
+    });
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -56,6 +69,38 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    if (authState.status == AuthStatus.loading ||
+        authState.status == AuthStatus.initial) {
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppColors.heroGradient),
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('🦅', style: TextStyle(fontSize: 64)),
+                SizedBox(height: 16),
+                Text(
+                  AppStrings.appName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 40),
+                CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [

@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
+import '../presentation/providers/profile_provider.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -12,6 +13,7 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final profileState = ref.watch(profileProvider);
     final themeState = ref.watch(themeProvider);
     final isDark = themeState.flutterThemeMode == ThemeMode.dark ||
         (themeState.mode == AppThemeMode.system &&
@@ -31,13 +33,13 @@ class AccountScreen extends ConsumerWidget {
               const SizedBox(height: 20),
 
               // Stats Row
-              _StatsRow(user: user),
+              _StatsRow(user: user, lessonsCompleted: profileState.progress?.completedSubtopics.length),
               const SizedBox(height: 28),
 
               // Language Progress
               const _SectionHeader('My language'),
               const SizedBox(height: 12),
-              _LanguageProgressCard(user: user),
+              _LanguageProgressCard(user: user, progress: profileState.progress),
               const SizedBox(height: 28),
 
               // Settings
@@ -264,7 +266,8 @@ class _ProfileHeader extends StatelessWidget {
 
 class _StatsRow extends StatelessWidget {
   final dynamic user;
-  const _StatsRow({required this.user});
+  final int? lessonsCompleted;
+  const _StatsRow({required this.user, this.lessonsCompleted});
 
   @override
   Widget build(BuildContext context) {
@@ -296,8 +299,8 @@ class _StatsRow extends StatelessWidget {
             iconColor: AppColors.accentYellow,
           ),
           _StatDivider(isDark: isDark),
-          const _StatItem(
-            value: '12',
+          _StatItem(
+            value: '${lessonsCompleted ?? 0}',
             label: 'Lessons',
             icon: Icons.menu_book_rounded,
             iconColor: AppColors.accentBlue,
@@ -454,7 +457,8 @@ class _SectionHeader extends StatelessWidget {
 
 class _LanguageProgressCard extends StatelessWidget {
   final dynamic user;
-  const _LanguageProgressCard({required this.user});
+  final dynamic progress;
+  const _LanguageProgressCard({required this.user, this.progress});
 
   String get _languageName {
     final lang = user?.selectedLanguage as String?;
@@ -463,12 +467,10 @@ class _LanguageProgressCard extends StatelessWidget {
   }
 
   String get _flag {
-    final lang = user?.selectedLanguage as String?;
+    final lang = (user?.selectedLanguage as String?)?.toLowerCase();
     switch (lang) {
       case 'igbo':
-        return '🇳🇬';
       case 'yoruba':
-        return '🇳🇬';
       case 'hausa':
         return '🇳🇬';
       default:
@@ -479,6 +481,14 @@ class _LanguageProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final percent = (progress?.overallProgressPercent as double?) ?? 0.0;
+    final progressValue = (percent / 100).clamp(0.0, 1.0);
+    final level = progress?.completedSubtopics.isEmpty == false
+        ? (progress!.completedSubtopics.last.unit)
+        : (user?.level as String? ?? 'beginner');
+    final lessonCount = (progress?.completedSubtopics?.length as int?) ?? 0;
+    final levelLabel = level[0].toUpperCase() + level.substring(1);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -508,15 +518,15 @@ class _LanguageProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(_languageName, style: AppTextStyles.headlineSmall),
-                const Text(
-                  'Beginner · 12 lessons done',
+                Text(
+                  '$levelLabel · $lessonCount lessons done',
                   style: AppTextStyles.bodySmall,
                 ),
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
-                    value: 0.35,
+                    value: progressValue,
                     backgroundColor: isDark ? AppColors.darkDivider : AppColors.divider,
                     color: AppColors.primary,
                     minHeight: 6,
@@ -527,7 +537,7 @@ class _LanguageProgressCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            '35%',
+            '${percent.toInt()}%',
             style: AppTextStyles.headlineSmall.copyWith(
               color: AppColors.primary,
             ),

@@ -73,6 +73,8 @@ class UserModel {
     String? country,
     String? fullName,
     String? username,
+    int? streakCount,
+    int? totalXp,
   }) {
     return UserModel(
       id: id,
@@ -86,8 +88,8 @@ class UserModel {
       level: level ?? this.level,
       authProvider: authProvider,
       isVerified: isVerified,
-      streakCount: streakCount,
-      totalXp: totalXp,
+      streakCount: streakCount ?? this.streakCount,
+      totalXp: totalXp ?? this.totalXp,
       createdAt: createdAt,
     );
   }

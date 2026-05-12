@@ -121,6 +121,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isLoggedIn() => _storage.isLoggedIn();
 
   @override
+  Future<void> updateCachedUser(UserModel user) async {
+    await _storage.saveUserJson(jsonEncode(user.toJson()));
+  }
+
+  @override
   Future<UserModel> updateProfile({String? selectedLanguage}) async {
     final user = await _remote.updateProfile(selectedLanguage: selectedLanguage);
     await _storage.saveUserJson(jsonEncode(user.toJson()));

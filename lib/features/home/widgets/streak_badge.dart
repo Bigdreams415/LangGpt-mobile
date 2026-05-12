@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 
 class StreakBadge extends StatelessWidget {
@@ -11,25 +12,27 @@ class StreakBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3E0),
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: const Color(0xFFFFCC80),
-          width: 1.5,
+          color: isDark ? AppColors.darkDivider : AppColors.divider,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🔥', style: TextStyle(fontSize: 16)),
-          const SizedBox(width: 4),
+          const Text('🔥', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 5),
           Text(
             '$streak',
-            style: AppTextStyles.headlineSmall.copyWith(
-              color: const Color(0xFFE65100),
+            style: AppTextStyles.labelLarge.copyWith(
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

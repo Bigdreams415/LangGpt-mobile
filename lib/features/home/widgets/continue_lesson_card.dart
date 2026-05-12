@@ -13,26 +13,33 @@ class ContinueLessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final progress = (lesson.progressPercentage / 100).clamp(0.0, 1.0);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.divider, width: 1),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.darkDivider : AppColors.divider,
+        ),
       ),
       child: Row(
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: AppColors.secondarySurface,
+              color: isDark
+                  ? AppColors.darkSurfaceVariant
+                  : AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Center(
               child: Text(
                 lesson.emoji,
-                style: const TextStyle(fontSize: 26),
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ),
@@ -43,32 +50,52 @@ class ContinueLessonCard extends StatelessWidget {
               children: [
                 Text(
                   lesson.title,
-                  style: AppTextStyles.headlineSmall,
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   '${lesson.language} · ${lesson.level}',
                   style: AppTextStyles.bodySmall,
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: LinearProgressIndicator(
-                    value: lesson.progressPercentage / 100,
-                    backgroundColor: AppColors.divider,
-                    color: AppColors.secondary,
-                    minHeight: 4,
-                  ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor:
+                              isDark ? AppColors.darkDivider : AppColors.divider,
+                          color: AppColors.primary,
+                          minHeight: 4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${lesson.progressPercentage.toInt()}%',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
           const SizedBox(width: 12),
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: AppColors.primary,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
               Icons.play_arrow_rounded,

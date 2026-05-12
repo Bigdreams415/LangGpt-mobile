@@ -44,6 +44,8 @@ class ProgressResponseModel {
   final String nextRecommendedUnit;
   final String nextRecommendedSubtopic;
   final double overallProgressPercent;
+  final int streakCount;
+  final int totalXp;
 
   const ProgressResponseModel({
     required this.userId,
@@ -57,6 +59,8 @@ class ProgressResponseModel {
     required this.nextRecommendedUnit,
     required this.nextRecommendedSubtopic,
     required this.overallProgressPercent,
+    this.streakCount = 0,
+    this.totalXp = 0,
   });
 
   factory ProgressResponseModel.fromJson(Map<String, dynamic> json) {
@@ -74,6 +78,8 @@ class ProgressResponseModel {
       nextRecommendedUnit: json['next_recommended_unit'] as String,
       nextRecommendedSubtopic: json['next_recommended_subtopic'] as String,
       overallProgressPercent: (json['overall_progress_percent'] as num).toDouble(),
+      streakCount: json['streak_count'] as int? ?? 0,
+      totalXp: json['total_xp'] as int? ?? 0,
     );
   }
 }
