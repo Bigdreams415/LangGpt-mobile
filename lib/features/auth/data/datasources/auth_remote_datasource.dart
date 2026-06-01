@@ -75,10 +75,18 @@ class AuthRemoteDataSource {
     return UserModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<UserModel> updateProfile({String? selectedLanguage}) async {
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? username,
+    String? country,
+    String? selectedLanguage,
+  }) async {
     final response = await _dio.patch(
       ApiConstants.updateProfile,
       data: {
+        if (fullName != null) 'full_name': fullName,
+        if (username != null) 'username': username,
+        if (country != null) 'country': country,
         if (selectedLanguage != null) 'selected_language': selectedLanguage,
       },
     );

@@ -9,6 +9,7 @@ class SecureStorageService {
   );
 
   static const _keyAccessToken = 'access_token';
+  static const _keyFcmToken = 'fcm_token';
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserId = 'user_id';
   static const _keyUserJson = 'user_json';
@@ -39,6 +40,12 @@ class SecureStorageService {
 
   Future<String?> getUserJson() =>
       _storage.read(key: _keyUserJson);
+
+  // FCM device token
+  Future<void> saveFcmToken(String token) =>
+      _storage.write(key: _keyFcmToken, value: token);
+
+  Future<String?> getFcmToken() => _storage.read(key: _keyFcmToken);
 
   // Clear all (logout)
   Future<void> clearAll() => _storage.deleteAll();

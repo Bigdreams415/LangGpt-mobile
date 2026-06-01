@@ -1,6 +1,4 @@
-# ============================================================================
 # Miscellaneous & OS Files
-# ============================================================================
 *.class
 *.log
 *.pyc
@@ -21,9 +19,7 @@ Thumbs.db
 .LSOverride
 .TemporaryItems
 
-# ============================================================================
 # IDE & Editor Files
-# ============================================================================
 *.iml
 *.ipr
 *.iws
@@ -36,9 +32,8 @@ Thumbs.db
 gradlew
 gradlew.bat
 
-# ============================================================================
-# Sensitive Files & Credentials (CRITICAL - DO NOT EXPOSE)
-# ============================================================================
+# Sensitive Files & Credentials 
+
 # Environment variables
 .env
 .env.local
@@ -78,9 +73,7 @@ key.properties
 *.cer
 *.p8
 
-# ============================================================================
 # Flutter/Dart/Pub Related
-# ============================================================================
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -94,6 +87,7 @@ key.properties
 .packages
 .flutter-plugins
 pubspec.lock
+.claude
 
 # Symbolication related
 app.*.symbols
@@ -101,9 +95,7 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# ============================================================================
 # Platform-Specific Build Artifacts
-# ============================================================================
 
 # Android
 /android/app/debug/
@@ -164,9 +156,7 @@ android/key.properties
 # Web
 **/web/plugins/url_strategy/
 
-# ============================================================================
 # Temporary & Cache Files
-# ============================================================================
 *.tmp
 *.bak
 *.swp

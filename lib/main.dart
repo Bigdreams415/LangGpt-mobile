@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,13 +16,20 @@ import 'features/lessons/screens/all_lessons_screen.dart';
 import 'features/lessons/screens/lesson_detail_screen.dart';
 import 'features/account/screens/language_screen.dart';
 import 'features/account/screens/delete_account_screen.dart';
+import 'features/notifications/screens/notifications_screen.dart';
+import 'features/account/screens/edit_profile_screen.dart';
 import 'navigation/main_navigation.dart';
+import 'services/fcm/fcm_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize API client
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   ApiClient.instance.initialize();
+
+  await FcmService.instance.initialize();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -50,6 +59,7 @@ class KinSpeakApp extends ConsumerWidget {
     return MaterialApp(
       title: 'KinSpeak',
       debugShowCheckedModeBanner: false,
+      navigatorKey: FcmService.navigatorKey,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeState.flutterThemeMode,
@@ -84,6 +94,10 @@ class KinSpeakApp extends ConsumerWidget {
             return _slideRoute(const LanguageScreen(), settings);
           case AppRoutes.deleteAccount:
             return _slideRoute(const DeleteAccountScreen(), settings);
+          case AppRoutes.notifications:
+            return _slideRoute(const NotificationsScreen(), settings);
+          case AppRoutes.editProfile:
+            return _slideRoute(const EditProfileScreen(), settings);
           default:
             return _fadeRoute(const GetStartedScreen(), settings);
         }

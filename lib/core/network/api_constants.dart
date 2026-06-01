@@ -38,6 +38,11 @@ class ApiConstants {
   // Translation
   static const String translate = '$apiPrefix/lessons/translate';
 
+  // Notifications
+  static const String notificationPreferences = '$apiPrefix/notifications/preferences';
+  static const String deviceToken = '$apiPrefix/notifications/device-token';
+  static const String testNotification = '$apiPrefix/notifications/test';
+
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }

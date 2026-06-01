@@ -67,6 +67,7 @@ class AppRoutes {
   static const String aboutNaijaLingo = '/about-naija-lingo';
   static const String helpSupport = '/help-support';
   static const String notifications = '/notifications';
+  static const String editProfile = '/edit-profile';
   static const String exploreUnitDetail = '/explore/unit-detail';
 }
 

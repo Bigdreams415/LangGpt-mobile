@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../presentation/providers/profile_provider.dart';
+import '../../../services/fcm/fcm_service.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -45,6 +50,8 @@ class AccountScreen extends ConsumerWidget {
               // Settings
               const _SectionHeader('Settings'),
               const SizedBox(height: 12),
+
+              // Group 1: app preferences
               _SettingsGroup(
                 items: [
                   _SettingsItem(
@@ -55,8 +62,8 @@ class AccountScreen extends ConsumerWidget {
                     onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
                   _SettingsItem(
-                    icon: Icons.language_outlined,
-                    label: 'App language',
+                    icon: Icons.translate_rounded,
+                    label: 'Learning language',
                     color: AppColors.accentBlueSurface,
                     iconColor: AppColors.accentBlue,
                     onTap: () => Navigator.pushNamed(context, AppRoutes.languageSelect),
@@ -67,15 +74,45 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.surfaceVariant,
                     iconColor: AppColors.textSecondary,
                     trailing: _ThemeSwitcher(
-                    themeState: themeState,
-                    onChanged: (mode) => ref.read(themeProvider.notifier).setMode(mode),
-                  ),
+                      themeState: themeState,
+                      onChanged: (mode) => ref.read(themeProvider.notifier).setMode(mode),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 14),
+
+              // Group 2: profile
               _SettingsGroup(
                 items: [
+                  _SettingsItem(
+                    icon: Icons.person_outline_rounded,
+                    label: 'Edit Profile',
+                    color: AppColors.primarySurface,
+                    iconColor: AppColors.primary,
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.editProfile),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Group 3: support & social
+              _SettingsGroup(
+                items: [
+                  _SettingsItem(
+                    icon: Icons.star_outline_rounded,
+                    label: 'Rate KinSpeak',
+                    color: AppColors.accentYellowSurface,
+                    iconColor: const Color(0xFFB8860B),
+                    onTap: () => _rateApp(),
+                  ),
+                  _SettingsItem(
+                    icon: Icons.share_outlined,
+                    label: 'Share KinSpeak',
+                    color: AppColors.primarySurface,
+                    iconColor: AppColors.primary,
+                    onTap: () => _shareApp(),
+                  ),
                   _SettingsItem(
                     icon: Icons.help_outline_rounded,
                     label: 'Help & Support',
@@ -89,13 +126,6 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.surfaceVariant,
                     iconColor: AppColors.textSecondary,
                     onTap: () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
-                  ),
-                  _SettingsItem(
-                    icon: Icons.info_outline_rounded,
-                    label: 'About KinSpeak',
-                    color: AppColors.surfaceVariant,
-                    iconColor: AppColors.textSecondary,
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.aboutNaijaLingo),
                   ),
                 ],
               ),
@@ -137,6 +167,21 @@ class AccountScreen extends ConsumerWidget {
     );
   }
 
+  void _rateApp() {
+    final uri = Platform.isIOS
+        ? Uri.parse('https://apps.apple.com/app/id000000000') 
+        : Uri.parse('https://play.google.com/store/apps/details?id=com.kinspeak.app');
+    launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  void _shareApp() {
+    Share.share(
+      'Learn Igbo, Yoruba & Hausa with KinSpeak — Nigeria\'s languages made easy!\n'
+      'Download now: https://kinspeak.app',
+      subject: 'Check out KinSpeak',
+    );
+  }
+
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -149,14 +194,19 @@ class AccountScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              ref.read(authProvider.notifier).logout();
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.getStarted,
-                (route) => false,
-              );
+              // Unregister device token before clearing storage so the
+              // bearer token is still valid during the API call.
+              await FcmService.instance.unregisterTokenFromBackend();
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.getStarted,
+                  (route) => false,
+                );
+              }
             },
             child: const Text(
               'Log out',

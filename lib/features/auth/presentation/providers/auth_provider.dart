@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../../../services/fcm/fcm_service.dart';
 
 // Auth State 
 
@@ -60,6 +63,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         status: AuthStatus.authenticated,
         user: user,
       );
+      unawaited(FcmService.instance.registerTokenWithBackend());
     } else {
       state = const AuthState(status: AuthStatus.unauthenticated);
     }
@@ -81,6 +85,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: response.user,
         isNewUser: false,
       );
+      unawaited(FcmService.instance.registerTokenWithBackend());
     } on DioException catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -122,6 +127,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: response.user,
         isNewUser: response.isNewUser,
       );
+      unawaited(FcmService.instance.registerTokenWithBackend());
     } on DioException catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -147,6 +153,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: response.user,
         isNewUser: response.isNewUser,
       );
+      unawaited(FcmService.instance.registerTokenWithBackend());
     } on DioException catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -178,6 +185,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final updated = await _repo.updateProfile(selectedLanguage: language);
       state = state.copyWith(user: updated);
     } catch (_) {}
+  }
+
+  // Returns an error string on failure, null on success.
+  Future<String?> updateProfile({
+    String? fullName,
+    String? username,
+    String? country,
+  }) async {
+    try {
+      final updated = await _repo.updateProfile(
+        fullName: fullName,
+        username: username,
+        country: country,
+      );
+      state = state.copyWith(user: updated);
+      return null;
+    } on DioException catch (e) {
+      return _parseDioError(e);
+    } catch (_) {
+      return 'Something went wrong. Please try again.';
+    }
   }
 
   // Logout
