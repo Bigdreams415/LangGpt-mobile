@@ -57,19 +57,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   bool _isTopicUnlocked({required String topicId, required HomeState state}) {
     final progress = _progress;
+    final continueLearningTopic = state.dashboard?.continueLearning?.topic;
 
-    if (progress == null) {
-      final currentFromDashboard = state.dashboard?.continueLearning?.topic;
-      if (currentFromDashboard != null && currentFromDashboard.isNotEmpty) {
-        return topicId == currentFromDashboard;
-      }
-      return true;
+    if (progress != null) {
+      if (progress.completedUnits.contains(topicId)) return true;
+      // If currentUnit is set, only that topic is unlocked
+      if (progress.currentUnit.isNotEmpty) return progress.currentUnit == topicId;
+      // currentUnit empty (new user or no active unit) — fall through to dashboard
     }
 
-    final completedUnits = progress.completedUnits.toSet();
-    if (completedUnits.contains(topicId)) return true;
-    if (progress.currentUnit.isNotEmpty) return progress.currentUnit == topicId;
-    return false;
+    // Use the dashboard's continue_learning topic as the source of truth
+    if (continueLearningTopic != null && continueLearningTopic.isNotEmpty) {
+      return topicId == continueLearningTopic;
+    }
+
+    // No progress info at all — unlock everything shown
+    return true;
   }
 
   @override
