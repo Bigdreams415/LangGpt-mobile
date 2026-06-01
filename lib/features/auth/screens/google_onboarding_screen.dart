@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../shared/widgets/app_button.dart';
-import 'signup_step1_screen.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../presentation/providers/auth_provider.dart';
 
-class SignupStep3Screen extends ConsumerStatefulWidget {
-  const SignupStep3Screen({super.key});
+class GoogleOnboardingScreen extends ConsumerStatefulWidget {
+  const GoogleOnboardingScreen({super.key});
+
   @override
-  ConsumerState<SignupStep3Screen> createState() => _SignupStep3ScreenState();
+  ConsumerState<GoogleOnboardingScreen> createState() =>
+      _GoogleOnboardingScreenState();
 }
 
-class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
+class _GoogleOnboardingScreenState
+    extends ConsumerState<GoogleOnboardingScreen> {
   String? _selectedLanguage;
   String? _selectedLevel;
   bool _isLoading = false;
 
-  final List<_LanguageOption> _languages = const [
+  static const _languages = [
     _LanguageOption(
       code: 'Igbo',
-      flag: '🟢',
       name: 'Igbo',
       subtitle: 'Southeast Nigeria',
       speakers: '~45M speakers',
@@ -30,7 +31,6 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
     ),
     _LanguageOption(
       code: 'Yoruba',
-      flag: '🔴',
       name: 'Yoruba',
       subtitle: 'Southwest Nigeria',
       speakers: '~50M speakers',
@@ -39,7 +39,6 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
     ),
     _LanguageOption(
       code: 'Hausa',
-      flag: '🔵',
       name: 'Hausa',
       subtitle: 'North Nigeria',
       speakers: '~80M speakers',
@@ -48,25 +47,10 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
     ),
   ];
 
-  final List<_LevelOption> _levels = const [
-    _LevelOption(
-      value: 'beginner',
-      title: 'Beginner',
-      subtitle: 'I know little to nothing',
-      icon: '🌱',
-    ),
-    _LevelOption(
-      value: 'intermediate',
-      title: 'Intermediate',
-      subtitle: 'I know some basics',
-      icon: '🌿',
-    ),
-    _LevelOption(
-      value: 'advanced',
-      title: 'Advanced',
-      subtitle: 'I can hold conversations',
-      icon: '🌳',
-    ),
+  static const _levels = [
+    _LevelOption(value: 'beginner', title: 'Beginner', subtitle: 'I know little to nothing', icon: '🌱'),
+    _LevelOption(value: 'intermediate', title: 'Intermediate', subtitle: 'I know some basics', icon: '🌿'),
+    _LevelOption(value: 'advanced', title: 'Advanced', subtitle: 'I can hold conversations', icon: '🌳'),
   ];
 
   void _handleFinish() async {
@@ -76,8 +60,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
           content: const Text('Please select a language to learn'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -88,48 +71,35 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
           content: const Text('Please select your current level'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
     }
 
-    final data = ModalRoute.of(context)!.settings.arguments as SignupData;
-    data.selectedLanguage = _selectedLanguage;
-    data.selectedLevel = _selectedLevel;
-
     setState(() => _isLoading = true);
 
-    await ref.read(authProvider.notifier).signup(
-          fullName: data.fullName,
-          username: data.username,
-          email: data.email,
-          password: data.password,
-          dateOfBirth: data.dateOfBirth,
-          country: data.country,
-          selectedLanguage: data.selectedLanguage,
-          level: data.selectedLevel,
+    final error = await ref.read(authProvider.notifier).setupLanguageAndLevel(
+          _selectedLanguage!,
+          _selectedLevel!,
         );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    final authState = ref.read(authProvider);
-
-    if (authState.status == AuthStatus.authenticated) {
-      Navigator.pushReplacementNamed(context, AppRoutes.main);
-    } else if (authState.errorMessage != null) {
+    if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authState.errorMessage!),
+          content: Text(error),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
+      return;
     }
+
+    Navigator.pushReplacementNamed(context, AppRoutes.main);
   }
 
   @override
@@ -142,29 +112,18 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 40),
 
-              // Top bar 
-              Row(
-                children: [
-                  _BackButton(onTap: () => Navigator.pop(context)),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                      child: _StepIndicator(currentStep: 3, totalSteps: 3)),
-                ],
-              ),
-              const SizedBox(height: 36),
-
-              // Header 
+              // Header
               const Text('Your learning\npath', style: AppTextStyles.displaySmall),
               const SizedBox(height: 8),
               const Text(
-                'Step 3 of 3 — Choose what you want to learn.',
+                'Choose what you want to learn and your current level.',
                 style: AppTextStyles.bodyMedium,
               ),
               const SizedBox(height: 32),
 
-              // Language Selection 
+              // Language Selection
               const Text('Which language do you want to learn?',
                   style: AppTextStyles.headlineSmall),
               const SizedBox(height: 14),
@@ -204,8 +163,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Center(
-                            child: Text('🇳🇬',
-                                style: TextStyle(fontSize: 24)),
+                            child: Text('🇳🇬', style: TextStyle(fontSize: 24)),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -213,22 +171,18 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(lang.name,
-                                  style: AppTextStyles.headlineSmall),
-                              Text(lang.subtitle,
-                                  style: AppTextStyles.bodySmall),
+                              Text(lang.name, style: AppTextStyles.headlineSmall),
+                              Text(lang.subtitle, style: AppTextStyles.bodySmall),
                               const SizedBox(height: 2),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: lang.bgColor,
                                   borderRadius: BorderRadius.circular(100),
                                 ),
                                 child: Text(
                                   lang.speakers,
-                                  style: AppTextStyles.labelSmall
-                                      .copyWith(color: lang.color),
+                                  style: AppTextStyles.labelSmall.copyWith(color: lang.color),
                                 ),
                               ),
                             ],
@@ -242,8 +196,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                               color: lang.color,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.check_rounded,
-                                color: Colors.white, size: 16),
+                            child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
                           )
                         else
                           Container(
@@ -251,8 +204,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                             height: 26,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: AppColors.divider, width: 2),
+                              border: Border.all(color: AppColors.divider, width: 2),
                             ),
                           ),
                       ],
@@ -264,8 +216,7 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
               const SizedBox(height: 28),
 
               // Level Selection
-              const Text("What's your current level?",
-                  style: AppTextStyles.headlineSmall),
+              const Text("What's your current level?", style: AppTextStyles.headlineSmall),
               const SizedBox(height: 14),
               Row(
                 children: _levels.map((lvl) {
@@ -275,43 +226,29 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                       onTap: () => setState(() => _selectedLevel = lvl.value),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        margin: EdgeInsets.only(
-                          right: _levels.last == lvl ? 0 : 10,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 8),
+                        margin: EdgeInsets.only(right: _levels.last == lvl ? 0 : 10),
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primarySurface
-                              : AppColors.surface,
+                          color: isSelected ? AppColors.primarySurface : AppColors.surface,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.divider,
+                            color: isSelected ? AppColors.primary : AppColors.divider,
                             width: isSelected ? 2 : 1.5,
                           ),
                         ),
                         child: Column(
                           children: [
-                            Text(lvl.icon,
-                                style: const TextStyle(fontSize: 26)),
+                            Text(lvl.icon, style: const TextStyle(fontSize: 26)),
                             const SizedBox(height: 6),
                             Text(
                               lvl.title,
                               style: AppTextStyles.labelLarge.copyWith(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.textPrimary,
+                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                              lvl.subtitle,
-                              style: AppTextStyles.labelSmall,
-                              textAlign: TextAlign.center,
-                            ),
+                            Text(lvl.subtitle, style: AppTextStyles.labelSmall, textAlign: TextAlign.center),
                           ],
                         ),
                       ),
@@ -327,16 +264,6 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
                 onPressed: _handleFinish,
                 isLoading: _isLoading,
               ),
-              const SizedBox(height: 12),
-
-              // Terms
-              const Center(
-                child: Text(
-                  'By signing up, you agree to our Terms of Service\nand Privacy Policy.',
-                  style: AppTextStyles.bodySmall,
-                  textAlign: TextAlign.center,
-                ),
-              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -346,11 +273,8 @@ class _SignupStep3ScreenState extends ConsumerState<SignupStep3Screen> {
   }
 }
 
-// Data classes
-
 class _LanguageOption {
   final String code;
-  final String flag;
   final String name;
   final String subtitle;
   final String speakers;
@@ -358,7 +282,6 @@ class _LanguageOption {
   final Color bgColor;
   const _LanguageOption({
     required this.code,
-    required this.flag,
     required this.name,
     required this.subtitle,
     required this.speakers,
@@ -378,54 +301,4 @@ class _LevelOption {
     required this.subtitle,
     required this.icon,
   });
-}
-
-// Shared widgets
-
-class _BackButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _BackButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider, width: 1.5),
-        ),
-        child: const Icon(Icons.arrow_back_ios_new_rounded,
-            size: 16, color: AppColors.textPrimary),
-      ),
-    );
-  }
-}
-
-class _StepIndicator extends StatelessWidget {
-  final int currentStep;
-  final int totalSteps;
-  const _StepIndicator({required this.currentStep, required this.totalSteps});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(totalSteps, (index) {
-        final isActive = index < currentStep;
-        return Expanded(
-          child: Container(
-            margin: const EdgeInsets.only(right: 6),
-            height: 4,
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.primary : AppColors.divider,
-              borderRadius: BorderRadius.circular(100),
-            ),
-          ),
-        );
-      }),
-    );
-  }
 }

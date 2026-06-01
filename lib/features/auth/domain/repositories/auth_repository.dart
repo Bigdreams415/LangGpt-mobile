@@ -33,6 +33,7 @@ abstract class AuthRepository {
     String? username,
     String? country,
     String? selectedLanguage,
+    String? level,
   });
 
   Future<void> updateCachedUser(UserModel user);

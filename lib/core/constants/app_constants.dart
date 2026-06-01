@@ -58,6 +58,7 @@ class AppRoutes {
   static const String signupStep2 = '/signup/step-2';
   static const String signupStep3 = '/signup/step-3';
   static const String main = '/main';
+  static const String googleOnboarding = '/google-onboarding';
   static const String home = '/home';
   static const String allLessons = '/all-lessons';
   static const String lessonDetail = '/lesson-detail';

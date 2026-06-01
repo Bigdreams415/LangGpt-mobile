@@ -113,6 +113,7 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Password is required';
                         if (v.length < 8) return 'Password must be at least 8 characters';
+                        if (v.length > 72) return 'Password must be 72 characters or fewer';
                         if (!RegExp(r'[A-Z]').hasMatch(v)) {
                           return 'Include at least one uppercase letter';
                         }

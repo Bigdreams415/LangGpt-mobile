@@ -80,6 +80,7 @@ class AuthRemoteDataSource {
     String? username,
     String? country,
     String? selectedLanguage,
+    String? level,
   }) async {
     final response = await _dio.patch(
       ApiConstants.updateProfile,
@@ -88,6 +89,7 @@ class AuthRemoteDataSource {
         if (username != null) 'username': username,
         if (country != null) 'country': country,
         if (selectedLanguage != null) 'selected_language': selectedLanguage,
+        if (level != null) 'level': level,
       },
     );
     return UserModel.fromJson(response.data as Map<String, dynamic>);

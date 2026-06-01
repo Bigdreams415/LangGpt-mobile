@@ -131,12 +131,14 @@ class AuthRepositoryImpl implements AuthRepository {
     String? username,
     String? country,
     String? selectedLanguage,
+    String? level,
   }) async {
     final user = await _remote.updateProfile(
       fullName: fullName,
       username: username,
       country: country,
       selectedLanguage: selectedLanguage,
+      level: level,
     );
     await _storage.saveUserJson(jsonEncode(user.toJson()));
     return user;

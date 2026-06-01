@@ -12,6 +12,7 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/signup_step1_screen.dart';
 import 'features/auth/screens/signup_step2_screen.dart';
 import 'features/auth/screens/signup_step3_screen.dart';
+import 'features/auth/screens/google_onboarding_screen.dart';
 import 'features/lessons/screens/all_lessons_screen.dart';
 import 'features/lessons/screens/lesson_detail_screen.dart';
 import 'features/account/screens/language_screen.dart';
@@ -76,6 +77,8 @@ class KinSpeakApp extends ConsumerWidget {
             return _slideRoute(const SignupStep2Screen(), settings);
           case AppRoutes.signupStep3:
             return _slideRoute(const SignupStep3Screen(), settings);
+          case AppRoutes.googleOnboarding:
+            return _slideRoute(const GoogleOnboardingScreen(), settings);
           case AppRoutes.main:
             return _fadeRoute(const MainNavigation(), settings);
           case AppRoutes.allLessons:

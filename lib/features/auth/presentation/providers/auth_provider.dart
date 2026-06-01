@@ -187,6 +187,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (_) {}
   }
 
+  // Called after Google sign-in onboarding to save language + level
+  Future<String?> setupLanguageAndLevel(String language, String level) async {
+    try {
+      final updated = await _repo.updateProfile(
+        selectedLanguage: language,
+        level: level,
+      );
+      state = state.copyWith(user: updated);
+      return null;
+    } on DioException catch (e) {
+      return _parseDioError(e);
+    } catch (_) {
+      return 'Something went wrong. Please try again.';
+    }
+  }
+
   // Returns an error string on failure, null on success.
   Future<String?> updateProfile({
     String? fullName,
@@ -216,25 +232,49 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Parse Dio errors into human-readable messages
   String _parseDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return 'Connection timed out. Please check your internet and try again.';
+    }
+    if (e.type == DioExceptionType.connectionError) {
+      return 'No internet connection. Please check your network.';
+    }
+
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
       final detail = data['detail'];
-      if (detail is String) return detail;
-      // Validation error format
-      final errors = data['errors'];
-      if (errors is List && errors.isNotEmpty) {
-        return errors.first['message'] as String? ?? 'Validation error';
+
+      // Plain string error (most HTTPExceptions)
+      if (detail is String && detail.isNotEmpty) return detail;
+
+      // FastAPI/Pydantic 422 validation errors — detail is a List of error objects
+      if (detail is List && detail.isNotEmpty) {
+        final first = detail.first;
+        if (first is Map<String, dynamic>) {
+          String msg = (first['msg'] as String? ?? '').trim();
+          // Pydantic v2 prefixes field_validator errors with "Value error, "
+          if (msg.startsWith('Value error, ')) {
+            msg = msg.substring('Value error, '.length);
+          }
+          if (msg.isNotEmpty) return msg;
+        }
+        return 'Please check your input and try again.';
       }
     }
+
     switch (e.response?.statusCode) {
       case 401:
-        return 'Invalid email/username or password';
+        return 'Invalid email/username or password.';
+      case 403:
+        return 'Your account has been deactivated. Contact support.';
       case 409:
-        return data?['detail'] as String? ?? 'Account already exists';
+        return (data is Map ? data['detail'] as String? : null) ??
+            'An account with these details already exists.';
       case 422:
-        return 'Please check your input and try again';
+        return 'Please check your input and try again.';
       case 500:
-        return 'Server error. Please try again later.';
+        return 'Something went wrong on our end. Please try again later.';
       default:
         return 'Connection error. Check your internet and try again.';
     }

@@ -66,7 +66,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.read(authProvider);
 
     if (authState.status == AuthStatus.authenticated) {
-      Navigator.pushReplacementNamed(context, AppRoutes.main);
+      final needsLanguage = authState.isNewUser ||
+          authState.user?.selectedLanguage == null;
+      Navigator.pushReplacementNamed(
+        context,
+        needsLanguage ? AppRoutes.googleOnboarding : AppRoutes.main,
+      );
     } else if (authState.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
