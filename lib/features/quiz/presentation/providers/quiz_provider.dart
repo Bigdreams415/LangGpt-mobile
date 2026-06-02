@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/repositories/quiz_repository_impl.dart';
 import '../../../progress/data/datasources/progress_remote_datasource.dart';
+import '../../../progress/presentation/providers/progress_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 enum QuizStatus { initial, loading, loaded, error, submitting }
@@ -100,6 +101,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
     }
   }
 
+  // Persists the quiz result. Returns true when the result was saved to the
+  // backend. Whether the learner passed is decided from the score by the
+  // caller, not by this method, so a network hiccup never looks like a fail.
   Future<bool> submitQuizResults({
     required String unit,
     required int subtopicIndex,
@@ -126,25 +130,24 @@ class QuizNotifier extends StateNotifier<QuizState> {
       );
 
       ref.read(authProvider.notifier).refreshUserStats(
-        progressResult.streakCount,
-        progressResult.totalXp,
-      );
+            progressResult.streakCount,
+            progressResult.totalXp,
+          );
+      ref.read(progressProvider.notifier).setProgress(progressResult);
 
-      final passed = score >= 80;
-      if (!mounted) return false;
+      if (!mounted) return true;
       state = state.copyWith(
         status: QuizStatus.loaded,
         isCompleted: true,
         finalScore: score,
       );
 
-      return passed;
+      return true;
     } catch (e) {
       if (!mounted) return false;
-      state = state.copyWith(
-        status: QuizStatus.error,
-        errorMessage: e.toString(),
-      );
+      // Keep the quiz on screen so the learner can retry the save; this isn't
+      // a quiz error, just a failed sync.
+      state = state.copyWith(status: QuizStatus.loaded);
       return false;
     }
   }

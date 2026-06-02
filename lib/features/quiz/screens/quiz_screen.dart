@@ -716,17 +716,33 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         _answerCorrectness.values.where((correct) => correct).length;
     final score = ((correctCount / quiz.questions.length) * 100).round();
 
-    final passed = widget.isPractice
-        ? score >= 80
-        : await ref.read(quizProvider.notifier).submitQuizResults(
-              unit: widget.unitId,
-              subtopicIndex: widget.subtopicIndex,
-              subtopicName: widget.subtopicName,
-              level: widget.level,
-              score: score,
-            );
+    // Passing is decided purely by the score, so a failed sync never shows up
+    // as a failed quiz.
+    final passed = score >= 80;
+
+    var saved = true;
+    if (!widget.isPractice) {
+      saved = await ref.read(quizProvider.notifier).submitQuizResults(
+            unit: widget.unitId,
+            subtopicIndex: widget.subtopicIndex,
+            subtopicName: widget.subtopicName,
+            level: widget.level,
+            score: score,
+          );
+    }
 
     if (mounted) {
+      if (!widget.isPractice && !saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Your score did not sync. Reconnect and finish again to unlock the next lesson.'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
       showDialog(
         context: context,
         barrierDismissible: false,

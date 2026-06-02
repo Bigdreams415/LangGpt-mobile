@@ -4,8 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
-import '../../progress/data/datasources/progress_remote_datasource.dart';
-import '../../progress/data/models/progress_model.dart';
+import '../../progress/presentation/providers/progress_provider.dart';
 import '../presentation/providers/home_provider.dart';
 import '../data/models/home_dashboard_model.dart';
 import '../widgets/streak_badge.dart';
@@ -24,60 +23,29 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final _progressDataSource = ProgressRemoteDataSource.instance;
-  ProgressResponseModel? _progress;
-
   @override
   void initState() {
     super.initState();
     // Load home data when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeProvider.notifier).loadDashboard();
-      _loadProgress();
+      ref.read(progressProvider.notifier).load();
     });
-  }
-
-  Future<void> _loadProgress() async {
-    final user = ref.read(currentUserProvider);
-    if (user == null) return;
-
-    final language = user.selectedLanguage ?? 'Igbo';
-    try {
-      final progress = await _progressDataSource.getProgress(
-        userId: user.id,
-        language: language,
-      );
-      if (!mounted) return;
-      setState(() => _progress = progress);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _progress = null);
-    }
-  }
-
-  bool _isTopicUnlocked({required String topicId, required HomeState state}) {
-    final progress = _progress;
-    final continueLearningTopic = state.dashboard?.continueLearning?.topic;
-
-    if (progress != null) {
-      if (progress.completedUnits.contains(topicId)) return true;
-      // If currentUnit is set, only that topic is unlocked
-      if (progress.currentUnit.isNotEmpty) return progress.currentUnit == topicId;
-      // currentUnit empty (new user or no active unit) — fall through to dashboard
-    }
-
-    // Use the dashboard's continue_learning topic as the source of truth
-    if (continueLearningTopic != null && continueLearningTopic.isNotEmpty) {
-      return topicId == continueLearningTopic;
-    }
-
-    // No progress info at all — unlock everything shown
-    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeProvider);
+
+    // When a unit gets completed (e.g. after passing its quiz), pull a fresh
+    // dashboard so "Continue learning" and the lesson list move forward too.
+    ref.listen(progressProvider, (previous, next) {
+      final before = previous?.progress?.completedUnits.length ?? 0;
+      final after = next.progress?.completedUnits.length ?? 0;
+      if (after > before) {
+        ref.read(homeProvider.notifier).refreshDashboard();
+      }
+    });
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -86,7 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onRefresh: () async {
             await Future.wait([
               ref.read(homeProvider.notifier).refreshDashboard(),
-              _loadProgress(),
+              ref.read(progressProvider.notifier).refresh(),
             ]);
           },
           color: AppColors.primary,
@@ -307,8 +275,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Today's Lessons Section 
+  // Today's Lessons Section
   Widget _buildTodayLessonsSection(HomeState state) {
+    final progress = ref.watch(progressProvider).progress;
+    final lessons = state.dashboard?.todayLessons ?? const [];
+    final orderedIds = lessons.map((l) => l.id).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -373,10 +345,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           )
         else
-          ...state.dashboard!.todayLessons.map(
-            (lesson) {
-              final isUnlocked =
-                  _isTopicUnlocked(topicId: lesson.id, state: state);
+          ...lessons.asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final lesson = entry.value;
+              final isUnlocked = isUnitUnlocked(
+                unitId: lesson.id,
+                index: index,
+                orderedUnitIds: orderedIds,
+                progress: progress,
+              );
               return GestureDetector(
                 onTap: () {
                   if (!isUnlocked) {

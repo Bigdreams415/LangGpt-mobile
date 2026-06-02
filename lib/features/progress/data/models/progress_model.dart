@@ -36,6 +36,7 @@ class ProgressResponseModel {
   final String userId;
   final String language;
   final List<String> completedUnits;
+  final List<String> unlockedUnits;
   final List<SubtopicProgressModel> completedSubtopics;
   final String currentUnit;
   final String currentSubtopic;
@@ -51,6 +52,7 @@ class ProgressResponseModel {
     required this.userId,
     required this.language,
     required this.completedUnits,
+    this.unlockedUnits = const [],
     required this.completedSubtopics,
     required this.currentUnit,
     required this.currentSubtopic,
@@ -68,6 +70,8 @@ class ProgressResponseModel {
       userId: json['user_id'] as String,
       language: json['language'] as String,
       completedUnits: (json['completed_units'] as List).cast<String>(),
+      unlockedUnits:
+          (json['unlocked_units'] as List?)?.cast<String>() ?? const [],
       completedSubtopics: (json['completed_subtopics'] as List)
           .map((e) => SubtopicProgressModel.fromJson(e as Map<String, dynamic>))
           .toList(),

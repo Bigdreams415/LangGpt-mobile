@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
-import '../../progress/data/datasources/progress_remote_datasource.dart';
-import '../../progress/data/models/progress_model.dart';
+import '../../progress/presentation/providers/progress_provider.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../presentation/providers/lessons_provider.dart';
 import '../widgets/lesson_topic_card.dart';
@@ -17,15 +16,12 @@ class AllLessonsScreen extends ConsumerStatefulWidget {
 }
 
 class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
-  final _progressDataSource = ProgressRemoteDataSource.instance;
-  ProgressResponseModel? _progress;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadLessons();
-      _loadProgress();
+      ref.read(progressProvider.notifier).load();
     });
   }
 
@@ -38,51 +34,6 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
           language: language,
           level: level,
         );
-  }
-
-  Future<void> _loadProgress() async {
-    final user = ref.read(currentUserProvider);
-    if (user == null) return;
-
-    final language = user.selectedLanguage ?? 'Igbo';
-    try {
-      final progress = await _progressDataSource.getProgress(
-        userId: user.id,
-        language: language,
-      );
-      if (!mounted) return;
-      setState(() => _progress = progress);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _progress = null);
-    }
-  }
-
-  bool _isTopicUnlocked({
-    required String topicId,
-    required List<dynamic> allTopics,
-    required int index,
-  }) {
-    final progress = _progress;
-    if (progress == null) {
-      return index == 0;
-    }
-
-    final completedUnits = progress.completedUnits.toSet();
-    if (completedUnits.contains(topicId)) return true;
-
-    if (progress.currentUnit.isNotEmpty) {
-      return progress.currentUnit == topicId;
-    }
-
-    final firstUncompleted = allTopics
-        .cast<dynamic>()
-        .firstWhere(
-          (topic) => !completedUnits.contains(topic.id as String),
-          orElse: () => allTopics.first,
-        )
-        .id as String;
-    return firstUncompleted == topicId;
   }
 
   @override
@@ -114,7 +65,7 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
                   language: language,
                   level: user?.level,
                 ),
-            _loadProgress(),
+            ref.read(progressProvider.notifier).refresh(),
           ]);
         },
         color: AppColors.primary,
@@ -163,15 +114,19 @@ class _AllLessonsScreenState extends ConsumerState<AllLessonsScreen> {
       );
     }
 
+    final progress = ref.watch(progressProvider).progress;
+    final orderedIds = state.lessonsList!.topics.map((t) => t.id).toList();
+
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: state.lessonsList!.topics.length,
       itemBuilder: (context, index) {
         final topic = state.lessonsList!.topics[index];
-        final unlocked = _isTopicUnlocked(
-          topicId: topic.id,
-          allTopics: state.lessonsList!.topics,
+        final unlocked = isUnitUnlocked(
+          unitId: topic.id,
           index: index,
+          orderedUnitIds: orderedIds,
+          progress: progress,
         );
 
         return LessonTopicCard(
